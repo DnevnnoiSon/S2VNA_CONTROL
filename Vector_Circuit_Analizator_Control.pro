@@ -10,12 +10,14 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    socketcommunication.cpp
 
 HEADERS += \
     MeasurementConfig.h \
     icommunication.h \
-    mainwindow.h
+    mainwindow.h \
+    socketcommunication.h
 
 FORMS += \
     mainwindow.ui

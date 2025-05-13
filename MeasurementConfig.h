@@ -1,5 +1,6 @@
 #ifndef MEASUREMENTCONFIG_H
 #define MEASUREMENTCONFIG_H
+
 //====== КОНФИГУРАЦИЯ ВАЦ =======//
 struct MeasurementConfig{
     double start_freq;

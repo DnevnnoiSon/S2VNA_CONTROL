@@ -22,12 +22,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 // Нажатие measure --> Валидация данных
     connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
 // Изменение статуса хоста --> measure в зеленный цвет
-    connect(communicator, &SocketCommunication::deviceStatusChanged,
+    connect(communicator, &ICommunication::deviceStatusChanged,
     this, &MainWindow::onDeviceStatusChanged, Qt::QueuedConnection); // связь между потоками
 // Сигнал сокетной ошибки --> Обработка ошибки
-    connect(communicator, &SocketCommunication::errorOccurred,
+    connect(communicator, &ICommunication::errorOccurred,
     this, &MainWindow::handleDeviceError, Qt::QueuedConnection); // связь между потоками
-
+// Передача валидных данных --> в поток связи
+    connect(this, &MainWindow::transfer_measurement_config,
+    communicator, &ICommunication::accept_measurement_config,
+    Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow(){
@@ -35,6 +38,7 @@ MainWindow::~MainWindow(){
 }
 
 void MainWindow::on_measureButton_clicked(){
+//Передаваемые замеры:
     measurement_config = {
         .start_freq = ui->startSpinBox->value(),
         .stop_freq = ui->endSpinBox->value(),
@@ -42,6 +46,15 @@ void MainWindow::on_measureButton_clicked(){
         .power = ui->powerSpinBox->value(),
         .samples = ui->samplesspinBox->value()
     };
+//Настройка сетевого подключения:
+    //..........
+
+
+
+//Передача в сокетный поток для отправки
+//передаваться будет сразу конвертированная в scpi команда:
+    QString command; //= конвертация
+    emit transfer_measurement_config(command);
 }
 
 void MainWindow::onDeviceStatusChanged(bool isReady){

@@ -2,11 +2,15 @@
 #define SOCKETCOMMUNICATION_H
 
 #include "icommunication.h"
+
 #include <QTcpSocket>
 #include <QThread>
 #include <QTimer>
 #include <memory>
-//Пользовательское определение связи с хостом - сокеты
+//==================================================================//
+//    Модуль связи с хостом через сокеты [S2VNA поток].             //
+//    Входным параметром является сконвертированная в scpi команда. //
+//==================================================================//
 using namespace std;
 
 class SocketCommunication : public ICommunication
@@ -16,18 +20,23 @@ public:
     explicit SocketCommunication(QObject *parent = nullptr);
     ~SocketCommunication();
 
-    int sendScpiCommand(const QString &command) override;
-   // void setMeasurementConfig(const MeasurementConfig& config) override;
+    int sendCommand(const QString &command) override;
+//Пользовательская: sendCommand + scpi упаковка
+//   void setMeasurementConfig(); //вынесу из класса в отдельный модуль
 
     void connectToDevice() override;
 // При подключении к хосту: [периодическая идиентификация -> pollTimer]
     void startPolling() override;
     void stopPolling() override;
 
+public slots:
+//принятие валидных данных с GUI потока:
+    void accept_measurement_config(const QString &command) override;
 private slots:
     void onReadyRead();
     void onConnected();
     void onError();
+
 
 private:
 //Буффер для накопления принятых данных:

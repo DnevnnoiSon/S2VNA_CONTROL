@@ -7,7 +7,7 @@
 #include <QVector>
 
 #include "MeasurementConfig.h"
-#include "icommunication.h"
+#include "socketcommunication.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,11 +16,12 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void transfer_measurement_config(const QString &command);
 private slots:
     void on_measureButton_clicked();
     void onDeviceStatusChanged(bool isReady);
@@ -28,12 +29,11 @@ private slots:
 private:
     Ui::MainWindow *ui;
  //Обьект коммуникации:
-    ICommunication* communicator;
+    ICommunication* communicator = new(SocketCommunication);
 
     QChart *chart;
- //Валидируемые данные:
+ //Вводные данные:
     MeasurementConfig measurement_config;
 };
-
 
 #endif // MAINWINDOW_H

@@ -80,8 +80,8 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>30</y>
+      <x>80</x>
+      <y>10</y>
       <width>201</width>
       <height>31</height>
      </rect>
@@ -99,7 +99,7 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>110</y>
+      <y>100</y>
       <width>381</width>
       <height>16</height>
      </rect>
@@ -112,7 +112,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>70</y>
+      <y>50</y>
       <width>41</width>
       <height>31</height>
      </rect>
@@ -148,7 +148,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>70</y>
+      <y>50</y>
       <width>111</width>
       <height>27</height>
      </rect>
@@ -240,7 +240,7 @@
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>70</y>
+      <y>50</y>
       <width>111</width>
       <height>27</height>
      </rect>
@@ -322,6 +322,19 @@
     </property>
     <property name="maximum">
      <number>65536</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>30</y>
+      <width>241</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>здесь будет распологаться график</string>
     </property>
    </widget>
   </widget>

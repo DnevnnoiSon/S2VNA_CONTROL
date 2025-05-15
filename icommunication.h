@@ -19,9 +19,9 @@ public:
     virtual void startPolling() = 0;  // Запуск опроса состояния
     virtual void stopPolling() = 0;   // Остановка опроса состояния
 public slots:
-    virtual void accept_measurement_config(const QString& command) = 0;
-protected:
-    MeasurementConfig measurement_config;
+// Передача валидных данных модулю связи:
+    virtual void accept_measure_config(const QString& command) = 0;
+    virtual void accept_setting_config(  const Settings &setting) = 0;
 signals:
     void deviceStatusChanged(bool isReady);
     void errorOccurred(const QString& message);

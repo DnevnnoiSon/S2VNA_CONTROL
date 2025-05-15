@@ -9,8 +9,9 @@ SocketCommunication::SocketCommunication(QObject *parent): ICommunication(parent
         pollTimer.reset(new QTimer());
 
         // Настройка соединения - периодический опрос
+        port = 5025;
         connect(pollTimer.get(), &QTimer::timeout, this, [this]() {
-            socket->connectToHost(QHostAddress::LocalHost, 5025);
+            socket->connectToHost(QHostAddress::LocalHost, port);
             socket->waitForConnected(100);
         }, Qt::QueuedConnection);
 
@@ -53,8 +54,7 @@ SocketCommunication::~SocketCommunication(){
 //                  ОТПРАВКА КОМАНД [SCPI] --> S2VNA                //
 //==================================================================//
 int SocketCommunication::sendCommand(const QString &command)
-{   /* Сюда поступает уже упакованная scpi команда */
-
+{
 //Проверка сетевого подключения:
     if (!socket || socket->state() != QAbstractSocket::ConnectedState){
         emit errorOccurred("Device is not connected");
@@ -101,10 +101,35 @@ void SocketCommunication::onError(){ /* Ошибка подключения */
     emit deviceStatusChanged(false);
 }
 
-void SocketCommunication::accept_measurement_config(const QString &command){
-    if (!command.isEmpty()) {
-//потоковая отправка данных: / отправка одной большой команды:
+//Отправка валидных UI данных:
+void SocketCommunication::accept_measure_config(const QString &command)
+{   /* Вх. данные - упакованная scpi команда */
+    if (command.isEmpty()) {
+        emit errorOccurred("Incorrect valid data");
+        return;
     }
+    sendCommand(command);
+}
+
+//Отправка валидных UI настроек модулю связи:
+void SocketCommunication::accept_setting_config(const Settings &setting)
+{
+    stopPolling();
+    if (socket->state() == QAbstractSocket::ConnectedState) {
+        socket->disconnectFromHost();
+    }
+    if(setting.network.ip_addr.isEmpty() || setting.network.port == 0){
+         emit errorOccurred("Settings update error");
+    }
+    // Обновление параметров подключения:
+    QHostAddress targetAddress(setting.network.ip_addr);
+    port = setting.network.port;
+
+    if (targetAddress.isNull()) {
+        emit errorOccurred("Error IP address update");
+        return;
+    }
+    startPolling();
 }
 
 //==================================================================//

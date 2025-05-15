@@ -31,14 +31,15 @@ public:
 
 public slots:
 //принятие валидных данных с GUI потока:
-    void accept_measurement_config(const QString &command) override;
+    void accept_measure_config(const QString &command) override;
+    void accept_setting_config(const Settings &setting) override;
 private slots:
     void onReadyRead();
     void onConnected();
     void onError();
 
-
 private:
+    volatile int port;
 //Буффер для накопления принятых данных:
     QByteArray responseBuffer;
 

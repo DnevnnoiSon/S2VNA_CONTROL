@@ -21,19 +21,19 @@ public:
     ~MainWindow();
 
 signals:
-    void transfer_measurement_config(const QString &command);
+    void transfer_measure_config(const QString &command);
+    void transfer_setting_config(const Settings &setting);
 private slots:
     void on_measureButton_clicked();
+    void on_updateButton_clicked();
     void onDeviceStatusChanged(bool isReady);
     void handleDeviceError(const QString& errorMessage);
 private:
     Ui::MainWindow *ui;
  //Обьект коммуникации:
-    ICommunication* communicator = new(SocketCommunication);
+    ICommunication* communicator = new SocketCommunication(this);
 
     QChart *chart;
- //Вводные данные:
-    MeasurementConfig measurement_config;
 };
 
 #endif // MAINWINDOW_H

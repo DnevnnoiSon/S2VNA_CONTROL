@@ -15,8 +15,8 @@ SOURCES += \
     socketcommunication.cpp
 
 HEADERS += \
-    MeasurementConfig.h \
     SCPIDevice.h \
+    ValidSettings.h \
     icommunication.h \
     mainwindow.h \
     s2vnadevice.h \

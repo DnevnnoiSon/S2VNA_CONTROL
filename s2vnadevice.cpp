@@ -27,26 +27,29 @@ QVariant S2VNADevice::parseResponse(const QString& response)
     return QVariant::fromValue(sParams);
 }
 
-QString S2VNADevice::buildFrequencySweep(const QVariantMap& config){
-    return QString("%1;%2")
-        .arg(builder.freqStart(config["start_freq"].toDouble()))
-        .arg(builder.freqStart(config["stop_freq"].toDouble()));
-}
-
 //======================================== ПЕРЕГРУЖЕННЫЕ ОПЕРАТОРЫ ==========================================//
-QString S2VNADevice::CommandGenerator::operator()(const QString& operation, const QVariantMap& config) const {
-    if (!device) throw std::invalid_argument("Device not initialized");
+QString S2VNADevice::S2VNACommandGenerator::operator()(const QString& operation, const QVariantMap& config) const
+{
+    if (!this->device){ qWarning() << "Device not initialized"; }
+
     if (operation == "FREQ_SWEEP") {
-        return device->buildFrequencySweep(config);
+        return this->device->buildFrequencySweep(config);
     } else if (operation == "SET_POWER") {
-        return device->builder.powerLevel(config["power"].toDouble());
+        return this->device->builder.powerLevel(config["power"].toDouble());
     }
-    //qDebug() << "Invalid operation!";
+
+    //qWarning() << "Invalid operation!";
     return 0;
 }
 
-QString S2VNADevice::CommandGenerator::operator()(const char* op, const QVariantMap& cfg) const {
+QString S2VNADevice::S2VNACommandGenerator::operator()(const char* op, const QVariantMap& cfg) const {
     return (*this)(QString(op), cfg);
 }
 
-
+QString S2VNADevice::buildFrequencySweep(const QVariantMap& config){
+    QStringList commands;
+    commands << builder.freqStart(config["start_freq"].toDouble())
+             << builder.freqStop(config["stop_freq"].toDouble())
+             << builder.freqStep(config["step"].toDouble());
+    return commands.join(";");
+}

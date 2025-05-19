@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVector>
 
-#include "MeasurementConfig.h"
+#include "ValidSettings.h"
 
 //Модуль связи с хостом:
 class ICommunication : public QObject {

@@ -5,22 +5,21 @@
 
 class S2VNADevice : public SCPIDevice {
 public:
-    // Полное определение вложенного класса внутри S2VNADevice
-    class CommandGenerator {
+    explicit S2VNADevice(int sens = 1, int sour = 1);
+
+// Класс для генерации scpi команды s2vna устройства:
+    class S2VNACommandGenerator : public SCPIDevice::CommandGenerator {
     public:
-        explicit CommandGenerator(S2VNADevice* dev = nullptr) : device(dev) {}
-
-        QString operator()(const QString& operation, const QVariantMap& config) const;
-        QString operator()(const char* operation, const QVariantMap& config) const;
-
+        explicit S2VNACommandGenerator(S2VNADevice* dev = nullptr) : device(dev) {}
+        QString operator()(const QString& operation, const QVariantMap& config) const override;
+        QString operator()(const char* operation, const QVariantMap& config) const override;
     private:
-        S2VNADevice* device;
+        S2VNADevice *device;
     };
 
-    CommandGenerator generateCommand; // Теперь тип полный
-    explicit S2VNADevice(int sens = 1, int sour = 1);
-    QVariant parseResponse(const QString& response) override;
-
+    /* [1] - Парсинг scpi, [2] - Сборка scpi */
+    QVariant parseResponse(const QString& response) override; // [1]
+    S2VNACommandGenerator generateCommand; // [2]
 protected:
     friend class CommandGenerator; // Дружественный доступ
     QString buildFrequencySweep(const QVariantMap& config);
@@ -34,6 +33,14 @@ private:
 
         QString freqStart(double value) const {
             return QString("%1:FREQ:STAR %2").arg(sens_prefix).arg(value);
+        }
+
+        QString freqStop(double value) const {
+            return QString("%1:FREQ:STOP %2").arg(sens_prefix).arg(value);
+        }
+
+        QString freqStep(double value) const {
+            return QString("%1:FREQ:STEP %2").arg(sens_prefix).arg(value);
         }
 
         QString powerLevel(double value) const {

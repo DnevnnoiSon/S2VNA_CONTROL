@@ -1,8 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
 #include "socketcommunication.h"
+#include "s2vnadevice.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 // Подключение к хосту --> авто-пробуждение S2VNA потока
     communicator = new SocketCommunication(this);
+// Выбор scpi устройства
+    scpi = new S2VNADevice();
 //График ВАЦ [полученные с S2VNA параметры]
     chart = new QChart();
 
@@ -51,19 +53,18 @@ MainWindow::~MainWindow(){
 }
 
 void MainWindow::on_measureButton_clicked(){
-    //Вводные данные:
-    MeasurementConfig measurement_config;
-    //Передаваемые замеры:
-    measurement_config = {
-        .start_freq = ui->startSpinBox->value(),
-        .stop_freq = ui->endSpinBox->value(),
-        .step = ui->stepSpinBox->value(),
-        .power = ui->powerSpinBox->value(),
-        .samples = ui->samplesspinBox->value()
+//Ввалидные данные:
+    QVariantMap config{
+        {"start_freq", ui->startSpinBox->value()},
+        {"stop_freq",  ui->endSpinBox->value()},
+        {"step",       ui->stepSpinBox->value()},
+        {"power",      ui->powerSpinBox->value()},
+        {"samples",    ui->samplesspinBox->value()}
     };
 //Проверка принятых данных:
 
 //Передача в сокетный поток для отправки:
+
     QString command; //= конвертация
     emit transfer_measure_config(command);
 }
@@ -85,6 +86,7 @@ void MainWindow::onDeviceStatusChanged(bool isReady){
     ui->measureButton->setStyleSheet(style);
 // Доступность кнопки:
     ui->measureButton->setEnabled(isReady);
+    statusBar()->showMessage("Successful connection!");
 }
 
 void MainWindow::handleDeviceError(const QString& errorMessage){

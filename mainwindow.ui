@@ -43,7 +43,7 @@
       <x>0</x>
       <y>370</y>
       <width>951</width>
-      <height>20</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -61,7 +61,7 @@
       <x>370</x>
       <y>0</y>
       <width>20</width>
-      <height>381</height>
+      <height>391</height>
      </rect>
     </property>
     <property name="orientation">
@@ -417,6 +417,16 @@
     </property>
     <property name="orientation">
      <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QTableView" name="tableView">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>50</y>
+      <width>471</width>
+      <height>331</height>
+     </rect>
     </property>
    </widget>
   </widget>

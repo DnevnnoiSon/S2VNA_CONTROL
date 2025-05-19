@@ -6,8 +6,11 @@
 #include <QChart>
 #include <QVector>
 
-#include "MeasurementConfig.h"
-#include "socketcommunication.h"
+#include "icommunication.h"
+#include "SCPIDevice.h"
+#include "ValidSettings.h"
+
+#include "s2vnadevice.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -31,7 +34,9 @@ private slots:
 private:
     Ui::MainWindow *ui;
  //Обьект коммуникации:
-    ICommunication* communicator = new SocketCommunication(this);
+    ICommunication* communicator;
+//Устройство SCPI: [S2VNA]
+    SCPIDevice* scpi;
 
     QChart *chart;
 };

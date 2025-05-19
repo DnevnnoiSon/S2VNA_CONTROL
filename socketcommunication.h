@@ -21,8 +21,6 @@ public:
     ~SocketCommunication();
 
     int sendCommand(const QString &command) override;
-//Пользовательская: sendCommand + scpi упаковка
-//   void setMeasurementConfig(); //вынесу из класса в отдельный модуль
 
     void connectToDevice() override;
 // При подключении к хосту: [периодическая идиентификация -> pollTimer]

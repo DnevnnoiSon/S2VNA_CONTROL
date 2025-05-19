@@ -11,12 +11,15 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    s2vnadevice.cpp \
     socketcommunication.cpp
 
 HEADERS += \
     MeasurementConfig.h \
+    SCPIDevice.h \
     icommunication.h \
     mainwindow.h \
+    s2vnadevice.h \
     socketcommunication.h
 
 FORMS += \

@@ -9,10 +9,7 @@ class SCPIDevice {
 public:
     virtual ~SCPIDevice() = default;
 
-    // Генерация 1 команды по имени операции и параметрам
-    virtual QString generateCommand(const QString& operation, const QVariantMap& config) = 0;
-
-    // Парсинг ответа устройства: возвр. параметр -
+    // Парсинг ответа устройства:
     virtual QVariant parseResponse(const QString& response) = 0;
 
     // Преобразование числа в научную нотацию

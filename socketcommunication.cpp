@@ -61,7 +61,6 @@ void SocketCommunication::connectToDevice(){
 //========================== СОКЕТНЫЕ ОБРАБОТЧИКИ ===========================//
 void SocketCommunication::onConnected(){   /* успешное подключение */
     stopPolling();
-
  //Отправка команды идиентификации:
     sendCommand("*IDN?\n");
 

@@ -1,16 +1,10 @@
 #include "s2vnadevice.h"
 
-using namespace std;
-
-QString S2VNADevice::generateCommand(const QString& operation, const QVariantMap& config)
+S2VNADevice::S2VNADevice(int sens, int sour)
+    : generateCommand(this),
+    builder(sens, sour)
 {
-    if (operation == "FREQ_SWEEP"){
-        return buildFrequencySweep(config);
-    }
-    else if (operation == "SET_POWER"){
-        return QString(":SOUR1:POW %1").arg(config["power"].toDouble());
-    }
-    return "";
+
 }
 
 QVariant S2VNADevice::parseResponse(const QString& response)
@@ -33,10 +27,26 @@ QVariant S2VNADevice::parseResponse(const QString& response)
     return QVariant::fromValue(sParams);
 }
 
-QString S2VNADevice::buildFrequencySweep(const QVariantMap& config)
-{
-    QStringList commands;
-    commands << QString(":SENS1:FREQ:START %1").arg(toScientific(config["start_freq"].toDouble()));
-    commands << QString(":SENS1:FREQ:STOP %1").arg(toScientific(config["stop_freq"].toDouble()));
-    return commands.join(";");
+QString S2VNADevice::buildFrequencySweep(const QVariantMap& config){
+    return QString("%1;%2")
+        .arg(builder.freqStart(config["start_freq"].toDouble()))
+        .arg(builder.freqStart(config["stop_freq"].toDouble()));
 }
+
+//======================================== ПЕРЕГРУЖЕННЫЕ ОПЕРАТОРЫ ==========================================//
+QString S2VNADevice::CommandGenerator::operator()(const QString& operation, const QVariantMap& config) const {
+    if (!device) throw std::invalid_argument("Device not initialized");
+    if (operation == "FREQ_SWEEP") {
+        return device->buildFrequencySweep(config);
+    } else if (operation == "SET_POWER") {
+        return device->builder.powerLevel(config["power"].toDouble());
+    }
+    //qDebug() << "Invalid operation!";
+    return 0;
+}
+
+QString S2VNADevice::CommandGenerator::operator()(const char* op, const QVariantMap& cfg) const {
+    return (*this)(QString(op), cfg);
+}
+
+

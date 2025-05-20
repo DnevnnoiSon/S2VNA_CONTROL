@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>870</width>
-    <height>460</height>
+    <height>456</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -357,8 +357,8 @@
      <string/>
     </property>
     <property name="icon">
-     <iconset>
-      <normaloff>settings.svg</normaloff>settings.svg</iconset>
+     <iconset resource="icons.qrc">
+      <normaloff>:/icons/settings.svg</normaloff>:/icons/settings.svg</iconset>
     </property>
     <property name="iconSize">
      <size>
@@ -429,9 +429,24 @@
      </rect>
     </property>
    </widget>
+   <widget class="QDialogButtonBox" name="buttonBox">
+    <property name="geometry">
+     <rect>
+      <x>690</x>
+      <y>400</y>
+      <width>166</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="standardButtons">
+     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 //График ВАЦ [полученные с S2VNA параметры]
     chart = new QChart();
 
+//    ui->networkButton->setIcon(QIcon(":/icons/settings.svg"));
+
     // Установка дефолтных значений
     ui->ipLineEdit->setText("127.0.0.1");
 

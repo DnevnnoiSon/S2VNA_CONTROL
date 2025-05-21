@@ -11,15 +11,14 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    s2vnadevice.cpp \
+    s2vna_scpi.cpp \
     socketcommunication.cpp
 
 HEADERS += \
-    SCPIDevice.h \
     ValidSettings.h \
     icommunication.h \
     mainwindow.h \
-    s2vnadevice.h \
+    s2vna_scpi.h \
     socketcommunication.h
 
 FORMS += \

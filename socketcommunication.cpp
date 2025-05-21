@@ -22,7 +22,6 @@ SocketCommunication::SocketCommunication(QObject *parent): ICommunication(parent
 
         startPolling();
     });
-
     thread->start();
 }
 
@@ -87,10 +86,13 @@ void SocketCommunication::onError(){ /* Ошибка подключения */
 void SocketCommunication::accept_measure_config(const QString &command)
 {   /* Вх. данные - упакованная scpi команда */
     if (command.isEmpty()) {
-        emit errorOccurred("Incorrect valid data");
+        emit errorOccurred("communication data error");
         return;
     }
+//Циклическая отправка по ';':
+    //...
     sendCommand(command);
+    //...
 }
 
 //Отправка валидных UI настроек модулю связи:

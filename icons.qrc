@@ -1,5 +1,11 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/icons/setting.jpg">
         <file>icons/settings.svg</file>
+    </qresource>
+    <qresource prefix="/icons/planar.png">
+        <file>icons/planar.png</file>
+    </qresource>
+    <qresource prefix="/icons/server.png">
+        <file>icons/server.png</file>
     </qresource>
 </RCC>

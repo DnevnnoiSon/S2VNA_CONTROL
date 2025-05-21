@@ -50,3 +50,5 @@ private:
 };
 
 #endif // SOCKETCOMMUNICATION_H
+
+

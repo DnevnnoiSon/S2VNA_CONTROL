@@ -7,10 +7,8 @@
 #include <QVector>
 
 #include "icommunication.h"
-#include "SCPIDevice.h"
+#include "s2vna_scpi.h"
 #include "ValidSettings.h"
-
-#include "s2vnadevice.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,7 +34,7 @@ private:
  //Обьект коммуникации:
     ICommunication* communicator;
 //Устройство SCPI: [S2VNA]
-    SCPIDevice* scpi;
+    S2VNA_SCPI scpi;
 
     QChart *chart;
 };

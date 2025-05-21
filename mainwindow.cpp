@@ -2,7 +2,8 @@
 #include "ui_mainwindow.h"
 
 #include "socketcommunication.h"
-#include "s2vnadevice.h"
+
+#define MAX_POWER 20
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -11,11 +12,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 // Подключение к хосту --> авто-пробуждение S2VNA потока
     communicator = new SocketCommunication(this);
 // Выбор scpi устройства
-    scpi = new S2VNADevice();
+
 //График ВАЦ [полученные с S2VNA параметры]
     chart = new QChart();
-
-//    ui->networkButton->setIcon(QIcon(":/icons/settings.svg"));
 
     // Установка дефолтных значений
     ui->ipLineEdit->setText("127.0.0.1");
@@ -55,19 +54,26 @@ MainWindow::~MainWindow(){
 }
 
 void MainWindow::on_measureButton_clicked(){
+    if( (ui->startSpinBox->value() >= ui->endSpinBox->value()) ||
+        (ui->powerSpinBox->value() > MAX_POWER) )
+    {
+        handleDeviceError("Incorrect valid data");
+    }
 //Ввалидные данные:
     QVariantMap config{
-        {"start_freq", ui->startSpinBox->value()},
-        {"stop_freq",  ui->endSpinBox->value()},
-        {"step",       ui->stepSpinBox->value()},
-        {"power",      ui->powerSpinBox->value()},
-        {"samples",    ui->samplesspinBox->value()}
+        {":SENS :FREQ:START", ui->startSpinBox->value()}, // Начальная частота
+        {":SENS :FREQ:STOP",  ui->endSpinBox->value()  }, // Конечная частота
+        {":SENS :BWID",       ui->stepspinBox->value() }, // Полоса фильтра ПЧ - [шаг измерения]
+        {":SOUR :POW1",       ui->powerSpinBox->value()}, // Мощность
     };
-//Проверка принятых данных:
 
+    QString modifiedKey;
+    for(auto it = config.begin(); it != config.end(); ++it){
+        modifiedKey = it.key();
+        modifiedKey.replace(' ', 'Z'); //Z - будет моя преобразованная величина
+    }
 //Передача в сокетный поток для отправки:
-
-    QString command; //= конвертация
+    QString command = scpi.generateCommand(config); //= конвертация
     emit transfer_measure_config(command);
 }
 
@@ -84,11 +90,10 @@ void MainWindow::on_updateButton_clicked()
 
 void MainWindow::onDeviceStatusChanged(bool isReady){
 // Смена цвета:
-    QString style = isReady ? "background-color: green;" : "";
+    QString style = isReady ? "background-color: darkblue;" : "";
     ui->measureButton->setStyleSheet(style);
 // Доступность кнопки:
     ui->measureButton->setEnabled(isReady);
-    statusBar()->showMessage("Successful connection!");
 }
 
 void MainWindow::handleDeviceError(const QString& errorMessage){

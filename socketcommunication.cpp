@@ -89,10 +89,11 @@ void SocketCommunication::accept_measure_config(const QString &command)
         emit errorOccurred("communication data error");
         return;
     }
-//Циклическая отправка по ';':
-    //...
-    sendCommand(command);
-    //...
+//Парсинг на части -> отправка
+    const auto multiple_parts = command.split(';');
+    for (const auto &part : multiple_parts){
+        sendCommand(part);
+    }
 }
 
 //Отправка валидных UI настроек модулю связи:

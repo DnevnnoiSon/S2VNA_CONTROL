@@ -3,7 +3,7 @@
 
 #include "socketcommunication.h"
 
-#define MAX_POWER 20
+#define MAX_POWER 60
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -54,10 +54,15 @@ MainWindow::~MainWindow(){
 }
 
 void MainWindow::on_measureButton_clicked(){
+
     if( (ui->startSpinBox->value() >= ui->endSpinBox->value()) ||
         (ui->powerSpinBox->value() > MAX_POWER) )
     {
-        handleDeviceError("Incorrect valid data");
+        handleDeviceError("Incorrect valid parameters");
+    }
+    if (!ui->cense1Button->isChecked() && !ui->cense2Button->isChecked()) {
+        handleDeviceError("Incorrect valid cense");
+        return;
     }
 //Ввалидные данные:
     QVariantMap config{
@@ -66,14 +71,20 @@ void MainWindow::on_measureButton_clicked(){
         {":SENS :BWID",       ui->stepspinBox->value() }, // Полоса фильтра ПЧ - [шаг измерения]
         {":SOUR :POW1",       ui->powerSpinBox->value()}, // Мощность
     };
+    //если не senc2, то sence1:
+    bool isAnySenc = ui->cense2Button->isChecked();
+    const QChar replacement = isAnySenc ? '1' : '0';
 
-    QString modifiedKey;
-    for(auto it = config.begin(); it != config.end(); ++it){
-        modifiedKey = it.key();
-        modifiedKey.replace(' ', 'Z'); //Z - будет моя преобразованная величина
+//Валидные данные + нужный sense:
+    QVariantMap modifiedConfig;
+
+    for (const auto &[key, value] : config.asKeyValueRange()){
+        QString modifiedKey = key;
+        modifiedKey.replace(' ', replacement);
+        modifiedConfig.insert(modifiedKey, value);
     }
 //Передача в сокетный поток для отправки:
-    QString command = scpi.generateCommand(config); //= конвертация
+    QString command = scpi.generateCommand(modifiedConfig); //= конвертация
     emit transfer_measure_config(command);
 }
 
@@ -90,14 +101,14 @@ void MainWindow::on_updateButton_clicked()
 
 void MainWindow::onDeviceStatusChanged(bool isReady){
 // Смена цвета:
-    QString style = isReady ? "background-color: darkblue;" : "";
+    QString style = isReady ? "background-color: darkgreen;" : "";
     ui->measureButton->setStyleSheet(style);
 // Доступность кнопки:
     ui->measureButton->setEnabled(isReady);
 }
 
 void MainWindow::handleDeviceError(const QString& errorMessage){
-    statusBar()->showMessage("Status: " + errorMessage);
+    statusBar()->showMessage("Status: " + errorMessage, 1000);
     //ui->measureButton->setEnabled(false);
 }
 

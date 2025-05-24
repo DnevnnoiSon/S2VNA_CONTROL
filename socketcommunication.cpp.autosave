@@ -60,6 +60,7 @@ void SocketCommunication::connectToDevice(){
 //========================== СОКЕТНЫЕ ОБРАБОТЧИКИ ===========================//
 void SocketCommunication::onConnected(){   /* успешное подключение */
     stopPolling();
+    isExpectingIDN = true;
  //Отправка команды идиентификации:
     sendCommand("*IDN?\n");
 
@@ -74,7 +75,9 @@ void SocketCommunication::onReadyRead(){     /* Готовность чтени�
     // Проверка на завершенность ответа - [\n]
     if (responseBuffer.endsWith('\n')) {
         //пришло завершенное сообщение:
-
+        
+       // isExpectingIDN? true -> парсинг IDN?\n /сигнал на вывод в QLabel вглавном потоке
+       //обыч
     }
     else{
        //сообщение неоконченно, требуется кэширование:
@@ -86,6 +89,7 @@ void SocketCommunication::onReadyRead(){     /* Готовность чтени�
 }
 
 void SocketCommunication::onError(){ /* Ошибка подключения */
+    isDeviceReady = false;
     emit errorOccurred(socket->errorString());
     emit deviceStatusChanged(false);
 }

@@ -12,7 +12,7 @@ SocketCommunication::SocketCommunication(QObject *parent): ICommunication(parent
         port = 5025;
         connect(pollTimer.get(), &QTimer::timeout, this, [this]() {
             socket->connectToHost(QHostAddress::LocalHost, port);
-            socket->waitForConnected(100);
+            socket->waitForConnected(50);
         }, Qt::QueuedConnection);
 
         connect(socket.get(), &QTcpSocket::connected, this, &SocketCommunication::onConnected);
@@ -60,6 +60,7 @@ void SocketCommunication::connectToDevice(){
 //========================== СОКЕТНЫЕ ОБРАБОТЧИКИ ===========================//
 void SocketCommunication::onConnected(){   /* успешное подключение */
     stopPolling();
+    isExpectingIDN = true;
  //Отправка команды идиентификации:
     sendCommand("*IDN?\n");
 
@@ -73,8 +74,14 @@ void SocketCommunication::onReadyRead(){     /* Готовность чтени�
     responseBuffer += socket->readAll();
     // Проверка на завершенность ответа - [\n]
     if (responseBuffer.endsWith('\n')) {
-        //пришло завершенное сообщение:
+         // флаг isExpectingIDN? true -> парсинг IDN?\n /сигнал на вывод в QLabel вглавном потоке
+        if(isExpectingIDN){
+            QString response = QString::fromUtf8(responseBuffer).trimmed();
+            emit idnReceived(response);
 
+            responseBuffer.clear();
+            isExpectingIDN = false;
+         }
     }
     else{
        //сообщение неоконченно, требуется кэширование:
@@ -86,6 +93,7 @@ void SocketCommunication::onReadyRead(){     /* Готовность чтени�
 }
 
 void SocketCommunication::onError(){ /* Ошибка подключения */
+    isDeviceReady = false;
     emit errorOccurred(socket->errorString());
     emit deviceStatusChanged(false);
 }
@@ -130,7 +138,7 @@ void SocketCommunication::accept_setting_config(const Settings &setting)
 //==================================================================//
 void SocketCommunication::startPolling(){
     QMetaObject::invokeMethod(pollTimer.get(), [this]() {
-        pollTimer->start(1000); // Опрос каждую секунду
+        pollTimer->start(500); // Опрос каждую секунду
     }, Qt::QueuedConnection);
 }
 

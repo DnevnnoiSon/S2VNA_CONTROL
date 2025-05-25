@@ -35,5 +35,7 @@ QString S2VNA_SCPI::generateCommand(const QVariantMap& params) const
     return commands.join("\n;") + "\n;";
 }
 
+//QVariant S2VNA_SCPI::parse_IDNResponse(const QString &idn_response){
 
+//}
 

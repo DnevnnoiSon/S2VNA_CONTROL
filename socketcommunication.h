@@ -26,7 +26,6 @@ public:
 // При подключении к хосту: [периодическая идиентификация -> pollTimer]
     void startPolling() override;
     void stopPolling() override;
-
 public slots:
 //принятие валидных данных с GUI потока:
     void accept_measure_config(const QString &command) override;
@@ -47,6 +46,7 @@ private:
 //Периодический опрос состояния:
     unique_ptr<QTimer> pollTimer;  // Таймер для периодического опроса [идиентификация]
     bool isDeviceReady = false;    // Флаг готовности устройства [сокетное подключение]
+    bool isExpectingIDN = false;   // Флаг ожидания ответа от  *IDN?
 };
 
 #endif // SOCKETCOMMUNICATION_H

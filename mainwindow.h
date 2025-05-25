@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QObject>
+#include <QLabel>
 #include <QChart>
 #include <QVector>
 
@@ -29,13 +30,17 @@ private slots:
     void on_updateButton_clicked();
     void onDeviceStatusChanged(bool isReady);
     void handleDeviceError(const QString& errorMessage);
+
+    void handleIdnResponse(const QString &idnInfo);
 private:
     Ui::MainWindow *ui;
+// Ответ на IDN? - вывод на экран:
+    QLabel *deviceInfoLabel[2];
  //Обьект коммуникации:
     ICommunication* communicator;
-//Устройство SCPI: [S2VNA]
+//Обрабатываемое устройство SCPI: [S2VNA]
     S2VNA_SCPI scpi;
-
+//Построение графика:
     QChart *chart;
 };
 

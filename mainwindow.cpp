@@ -8,7 +8,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    deviceInfoLabel[0] = new QLabel(this);
+    deviceInfoLabel[1] = new QLabel(this);
 // Подключение к хосту --> авто-пробуждение S2VNA потока
     communicator = new SocketCommunication(this);
 // Выбор scpi устройства
@@ -21,6 +22,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->portSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
     ui->portSpinBox->setValue(5025);
+
+    ui->modelLabel->setStyleSheet("color: green; font-weight: bold;");
+    ui->vendorLabel->setStyleSheet("color: green; font-weight: bold;");
+    ui->modelLabel->clear();
+    ui->vendorLabel->clear();
 
     ui->consoleButton->setFlat(true);
     ui->consoleButton->setStyleSheet("background: transparent; border: none;");
@@ -43,18 +49,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(this, &MainWindow::transfer_measure_config,
     communicator, &ICommunication::accept_measure_config,
     Qt::QueuedConnection);
+
 // Передача сетевых настроек --> в поток связи
     connect(this, &MainWindow::transfer_setting_config,
     communicator, &ICommunication::accept_setting_config,
     Qt::QueuedConnection);
+
+// Ответ от IDN? --> Обработка/Вывод на экран
+    connect(communicator, &ICommunication::idnReceived,
+    this, &MainWindow::handleIdnResponse, Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow(){
     delete ui;
 }
 
-void MainWindow::on_measureButton_clicked(){
-
+void MainWindow::on_measureButton_clicked()
+{
     if( (ui->startSpinBox->value() >= ui->endSpinBox->value()) ||
         (ui->powerSpinBox->value() > MAX_POWER) )
     {
@@ -88,8 +99,7 @@ void MainWindow::on_measureButton_clicked(){
     emit transfer_measure_config(command);
 }
 
-void MainWindow::on_updateButton_clicked()
-{
+void MainWindow::on_updateButton_clicked(){
     Settings setting;
     //Настройка сетевого подключения:
     setting.network.ip_addr = ui->ipLineEdit->text();
@@ -108,11 +118,27 @@ void MainWindow::onDeviceStatusChanged(bool isReady){
 }
 
 void MainWindow::handleDeviceError(const QString& errorMessage){
+    ui->modelLabel->clear();
+    ui->vendorLabel->clear();
+
     statusBar()->showMessage("Status: " + errorMessage, 1000);
     //ui->measureButton->setEnabled(false);
 }
 
+void MainWindow::handleIdnResponse(const QString &idnInfo) {
+// Текущий ответ от устройства: "Planar, C1209, , 25.1.1/1"
+    QStringList parts = idnInfo.split(',');
+    if (parts.size() >= 4){
+        QString vendor = parts[0].trimmed();
+        QString model = parts[1].trimmed();
 
+        ui->modelLabel->setText(model);
+        ui->vendorLabel->setText(vendor);
+    } else {
+        ui->modelLabel->setText("Unknown device");
+        ui->vendorLabel->setText("Unknown vendor");
+    }
+}
 
 
 

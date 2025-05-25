@@ -7,11 +7,11 @@
 #include <QStringList>
 
 class S2VNA_SCPI
-{
+{ /* [1] - Парсинг scpi, [2] - Сборка scpi, [3] - Парсинг ответа от *IDN? */
 public:
-    /* [1] - Парсинг scpi, [2] - Сборка scpi */
-    QVariant parseResponse(const QString& response); // [1]
-    QString generateCommand(const QVariantMap& params) const; //[2]
+    QVariant parseResponse(const QString& response);          // [1]
+    QString generateCommand(const QVariantMap& params) const; // [2]
+//    QVariant parse_IDNResponse(const QString &idn_response);  // [3]
 };
 
 #endif // S2VNA_SCPI_H

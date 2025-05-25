@@ -21,19 +21,13 @@ QVariant S2VNA_SCPI::parseResponse(const QString& response)
 }
 
 QString S2VNA_SCPI::generateCommand(const QVariantMap& params) const
-{
+{ // Команда - ключ, Значение - строка
     QStringList commands;
 
-    for (auto it = params.constBegin(); it != params.constEnd(); ++it) {
-        // Команда - ключ, Значение - строка
-        // Формирование команды: "SCPI_CMD VALUE"
-        if(it.value() != 0){
-            commands.append(QString("%1 %2").arg(it.key(), it.value().toString()));
-        } else{
-            commands.append(it.key());
-        }
+    for (const auto &[key, value] : params.toStdMap()) {
+        // Формирование команды: "SCPI_CMD VALUE" + учитывать отсутствие VALUE:
+        commands.append(value.toInt() ? QString("%1 %2").arg(key, value.toString()) : key);
     }
     // Объеденение команд ";\n":
     return commands.join("\n;") + "\n";
 }
-

@@ -7,6 +7,8 @@
 #include <QChart>
 #include <QVector>
 
+#include "sparameterplotter.h"
+
 #include "icommunication.h"
 #include "s2vna_scpi.h"
 #include "ValidSettings.h"
@@ -46,7 +48,7 @@ private:
 //Обрабатываемое устройство SCPI: [S2VNA]
     S2VNA_SCPI scpi;
 //Построение графика:
-    QChart *chart;
+    SParameterPlotter *plotter;
 };
 
 #endif // MAINWINDOW_H

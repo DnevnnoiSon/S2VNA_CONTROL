@@ -19,7 +19,7 @@ void MainWindow::InitUI(){
     // Подключение к хосту --> авто-пробуждение S2VNA потока
     communicator = new SocketCommunication(this);
     //График ВАЦ [полученные с S2VNA параметры]
-    chart = new QChart();
+    plotter = new SParameterPlotter(this);
 }
 
 //========================Установка стилей ==========================//
@@ -32,8 +32,8 @@ void MainWindow::ApplyStyles()
     ui->vendorLabel->clear();
 
     // Кнопки:
-    ui->consoleButton->setFlat(true);
-    ui->consoleButton->setStyleSheet("background: transparent; border: none;");
+    ui->decoreButton->setFlat(true);
+    ui->decoreButton->setStyleSheet("background: transparent; border: none;");
     ui->networkButton->setFlat(true);
     ui->networkButton->setStyleSheet("background: transparent; border: none;");
 
@@ -89,6 +89,7 @@ void MainWindow::on_measureButton_clicked()
     }
 //Ввалидные данные:
     QVariantMap config{
+    //СОГЛАШЕНИЕ МОЕГО CONFIG КОНТЕЙНЕРА: если параметра нет - 0;
         {"SENSe :FREQuency:STARt", ui->startSpinBox->value()},  // Начальная частота
         {"SENSe :FREQuency:STOP",  ui->endSpinBox->value()  },  // Конечная частота
         {"SENSe :SWEep:POINts", ui->stepspinBox->value() },     // Кол-во точек

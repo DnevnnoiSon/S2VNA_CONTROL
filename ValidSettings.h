@@ -12,9 +12,7 @@ class Settings{
 public:
 /* Для socket взаимодействия: */
     Network network;
-private:
-/* Валидные параметры ВАЦ: */
-    QVariantMap measurement;
+//Другие типы соединения:
 };
 
 #endif // VALIDSETTINGS_H

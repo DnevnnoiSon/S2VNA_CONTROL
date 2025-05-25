@@ -12,14 +12,16 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     s2vna_scpi.cpp \
-    socketcommunication.cpp
+    socketcommunication.cpp \
+    sparameterplotter.cpp
 
 HEADERS += \
     ValidSettings.h \
     icommunication.h \
     mainwindow.h \
     s2vna_scpi.h \
-    socketcommunication.h
+    socketcommunication.h \
+    sparameterplotter.h
 
 FORMS += \
     mainwindow.ui

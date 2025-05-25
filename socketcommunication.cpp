@@ -12,7 +12,7 @@ SocketCommunication::SocketCommunication(QObject *parent): ICommunication(parent
         port = 5025;
         connect(pollTimer.get(), &QTimer::timeout, this, [this]() {
             socket->connectToHost(QHostAddress::LocalHost, port);
-            socket->waitForConnected(50);
+            socket->waitForConnected(500);
         }, Qt::QueuedConnection);
 
         connect(socket.get(), &QTcpSocket::connected, this, &SocketCommunication::onConnected);
@@ -46,7 +46,7 @@ int SocketCommunication::sendCommand(const QString &command)
     QByteArray scpi_cmd = command.toUtf8();
 
     auto result = socket->write(scpi_cmd);
-    if (result == -1 || !socket->waitForBytesWritten(500)){
+    if (result == -1 || !socket->waitForBytesWritten(1000)){
         emit errorOccurred("Failed to send command");
         return 1;
     }
@@ -55,6 +55,7 @@ int SocketCommunication::sendCommand(const QString &command)
 
 void SocketCommunication::connectToDevice(){
 // Здесь будут разовые действия при самом начале подключения:
+    sendCommand("*RST\n");
 }
 
 //========================== СОКЕТНЫЕ ОБРАБОТЧИКИ ===========================//
@@ -72,6 +73,7 @@ void SocketCommunication::onConnected(){   /* успешное подключе�
 //==================================================================//
 void SocketCommunication::onReadyRead(){     /* Готовность чтения[прием данных] */
     responseBuffer += socket->readAll();
+    qDebug() << "Response: " << responseBuffer;
     // Проверка на завершенность ответа - [\n]
     if (responseBuffer.endsWith('\n')) {
          // флаг isExpectingIDN? true -> парсинг IDN?\n /сигнал на вывод в QLabel вглавном потоке
@@ -108,7 +110,7 @@ void SocketCommunication::accept_measure_config(const QString &command)
 //Парсинг на части -> отправка
     const auto multiple_parts = command.split(';');
     for (const auto &part : multiple_parts){
-        sendCommand(part);
+        sendCommand(part.trimmed());
     }
 }
 

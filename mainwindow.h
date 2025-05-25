@@ -33,6 +33,11 @@ private slots:
 
     void handleIdnResponse(const QString &idnInfo);
 private:
+//========= Конструкторские функции:
+    void InitUI();           // Создание виджетов
+    void ApplyStyles();      // Стилизация
+    void SetupConnections(); // Сигналы/слоты
+//========= Обьекты:
     Ui::MainWindow *ui;
 // Ответ на IDN? - вывод на экран:
     QLabel *deviceInfoLabel[2];

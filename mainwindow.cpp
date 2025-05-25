@@ -8,54 +8,66 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    deviceInfoLabel[0] = new QLabel(this);
-    deviceInfoLabel[1] = new QLabel(this);
-// Подключение к хосту --> авто-пробуждение S2VNA потока
+
+    InitUI();           // Создание виджетов
+    ApplyStyles();      // Стилизация
+    SetupConnections(); // Сигналы/слоты
+}
+
+//================ Создание виджетов ===============//
+void MainWindow::InitUI(){
+    // Подключение к хосту --> авто-пробуждение S2VNA потока
     communicator = new SocketCommunication(this);
-// Выбор scpi устройства
-
-//График ВАЦ [полученные с S2VNA параметры]
+    //График ВАЦ [полученные с S2VNA параметры]
     chart = new QChart();
+}
 
-    // Установка дефолтных значений
-    ui->ipLineEdit->setText("127.0.0.1");
-
-    ui->portSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    ui->portSpinBox->setValue(5025);
-
+//========================Установка стилей ==========================//
+void MainWindow::ApplyStyles()
+{
+    //Метки:
     ui->modelLabel->setStyleSheet("color: green; font-weight: bold;");
     ui->vendorLabel->setStyleSheet("color: green; font-weight: bold;");
     ui->modelLabel->clear();
     ui->vendorLabel->clear();
 
+    // Кнопки:
     ui->consoleButton->setFlat(true);
     ui->consoleButton->setStyleSheet("background: transparent; border: none;");
     ui->networkButton->setFlat(true);
     ui->networkButton->setStyleSheet("background: transparent; border: none;");
 
-// Нажатие measure --> Валидация данных
+    // Cетевые настройки по умолчанию:
+    ui->ipLineEdit->setText("127.0.0.1");
+    ui->portSpinBox->setValue(5025);
+
+    //Кастомизация:
+    ui->portSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
+}
+
+//================== Настройка сигналов и слотов=====================//
+void MainWindow::SetupConnections(){
+    // Нажатие Измерить --> Валидация даннных конфигурации ВАЦ
     connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
-// Нажатие update --> Обновление настроек сетевого подключения
+    // Нажатие Обновить --> Валидация настроек сетевого подключения
     connect(ui->updateButton,&QPushButton::clicked, this, &MainWindow::on_updateButton_clicked);
-// Изменение статуса хоста --> measure в зеленный цвет
+    // Изменение статуса хоста --> Кнопка измерить в зеленный цвет
     connect(communicator, &ICommunication::deviceStatusChanged,
+    this, &MainWindow::onDeviceStatusChanged, Qt::QueuedConnection);
 
-    this, &MainWindow::onDeviceStatusChanged, Qt::QueuedConnection); // связь между потоками
-// Сигнал сокетной ошибки --> Обработка ошибки
+    // Сигнал сокетной ошибки --> Обработка ошибки
     connect(communicator, &ICommunication::errorOccurred,
-    this, &MainWindow::handleDeviceError, Qt::QueuedConnection); // связь между потоками
+    this, &MainWindow::handleDeviceError, Qt::QueuedConnection);
 
-// Передача валидных данных --> в поток связи
+    // Передача валидных данных --> в поток связи
     connect(this, &MainWindow::transfer_measure_config,
-    communicator, &ICommunication::accept_measure_config,
-    Qt::QueuedConnection);
+    communicator, &ICommunication::accept_measure_config, Qt::QueuedConnection);
 
-// Передача сетевых настроек --> в поток связи
+    // Передача сетевых настроек --> в поток связи
     connect(this, &MainWindow::transfer_setting_config,
-    communicator, &ICommunication::accept_setting_config,
-    Qt::QueuedConnection);
+    communicator, &ICommunication::accept_setting_config, Qt::QueuedConnection);
 
-// Ответ от IDN? --> Обработка/Вывод на экран
+    // Ответ от IDN? --> Обработка/Вывод на экран
     connect(communicator, &ICommunication::idnReceived,
     this, &MainWindow::handleIdnResponse, Qt::QueuedConnection);
 }
@@ -77,10 +89,11 @@ void MainWindow::on_measureButton_clicked()
     }
 //Ввалидные данные:
     QVariantMap config{
-        {":SENS :FREQ:START", ui->startSpinBox->value()}, // Начальная частота
-        {":SENS :FREQ:STOP",  ui->endSpinBox->value()  }, // Конечная частота
-        {":SENS :BWID",       ui->stepspinBox->value() }, // Полоса фильтра ПЧ - [шаг измерения]
-        {":SOUR :POW1",       ui->powerSpinBox->value()}, // Мощность
+        {"SENSe :FREQuency:STARt", ui->startSpinBox->value()},  // Начальная частота
+        {"SENSe :FREQuency:STOP",  ui->endSpinBox->value()  },  // Конечная частота
+        {"SENSe :SWEep:POINts", ui->stepspinBox->value() },     // Кол-во точек
+        {"SOURce :POWer",          ui->powerSpinBox->value()},  // Мощность
+        {"CALCulate :DATA:SDATa?", 0},  //Запрос на считывания -> [SS,частоты]..
     };
     //если не senc2, то sence1:
     bool isAnySenc = ui->cense2Button->isChecked();
@@ -108,7 +121,6 @@ void MainWindow::on_updateButton_clicked(){
     emit transfer_setting_config(setting);
 }
 
-
 void MainWindow::onDeviceStatusChanged(bool isReady){
 // Смена цвета:
     QString style = isReady ? "background-color: darkgreen;" : "";
@@ -121,7 +133,7 @@ void MainWindow::handleDeviceError(const QString& errorMessage){
     ui->modelLabel->clear();
     ui->vendorLabel->clear();
 
-    statusBar()->showMessage("Status: " + errorMessage, 1000);
+    statusBar()->showMessage("Status: " + errorMessage, 600);
     //ui->measureButton->setEnabled(false);
 }
 
@@ -129,16 +141,12 @@ void MainWindow::handleIdnResponse(const QString &idnInfo) {
 // Текущий ответ от устройства: "Planar, C1209, , 25.1.1/1"
     QStringList parts = idnInfo.split(',');
     if (parts.size() >= 4){
-        QString vendor = parts[0].trimmed();
-        QString model = parts[1].trimmed();
-
-        ui->modelLabel->setText(model);
-        ui->vendorLabel->setText(vendor);
+        ui->modelLabel->setText(parts[1].trimmed());
+        ui->vendorLabel->setText( parts[0].trimmed());
     } else {
         ui->modelLabel->setText("Unknown device");
         ui->vendorLabel->setText("Unknown vendor");
     }
 }
-
 
 

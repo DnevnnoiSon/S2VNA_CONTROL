@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
     MainWindow S2VNA_Control;
     S2VNA_Control.setWindowTitle("S2VNA CONTROL");
 
+//поменять местами хуйню с мощностью и точкой
 
 
     S2VNA_Control.show();

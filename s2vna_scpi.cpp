@@ -25,17 +25,15 @@ QString S2VNA_SCPI::generateCommand(const QVariantMap& params) const
     QStringList commands;
 
     for (auto it = params.constBegin(); it != params.constEnd(); ++it) {
-        const QString& scpi_сmd = it.key();           // Команда (ключ)
-        const QString value = it.value().toString(); // Значение (как строка)
-
-        // Формируем команду: "SCPI_CMD VALUE"
-        commands.append(QString("%1 %2").arg(scpi_сmd, value));
+        // Команда - ключ, Значение - строка
+        // Формирование команды: "SCPI_CMD VALUE"
+        if(it.value() != 0){
+            commands.append(QString("%1 %2").arg(it.key(), it.value().toString()));
+        } else{
+            commands.append(it.key());
+        }
     }
     // Объеденение команд ";\n":
-    return commands.join("\n;") + "\n;";
+    return commands.join("\n;") + "\n";
 }
-
-//QVariant S2VNA_SCPI::parse_IDNResponse(const QString &idn_response){
-
-//}
 

@@ -229,8 +229,8 @@
        <widget class="QLabel" name="label_5">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>100</y>
+          <x>20</x>
+          <y>170</y>
           <width>191</width>
           <height>31</height>
          </rect>
@@ -254,7 +254,7 @@
         <property name="geometry">
          <rect>
           <x>240</x>
-          <y>100</y>
+          <y>170</y>
           <width>71</width>
           <height>31</height>
          </rect>
@@ -276,9 +276,9 @@
        <widget class="QLabel" name="label_3">
         <property name="geometry">
          <rect>
-          <x>50</x>
-          <y>170</y>
-          <width>161</width>
+          <x>40</x>
+          <y>100</y>
+          <width>231</width>
           <height>31</height>
          </rect>
         </property>
@@ -288,17 +288,20 @@
          </font>
         </property>
         <property name="text">
-         <string>Шаг измерения:</string>
+         <string>Количество  точек:</string>
         </property>
        </widget>
        <widget class="QSpinBox" name="stepspinBox">
         <property name="geometry">
          <rect>
           <x>240</x>
-          <y>170</y>
+          <y>100</y>
           <width>71</width>
-          <height>27</height>
+          <height>31</height>
          </rect>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
         </property>
        </widget>
        <widget class="QPushButton" name="networkButton">
@@ -541,10 +544,10 @@
           </size>
          </property>
          <property name="autoDefault">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="default">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="flat">
           <bool>true</bool>

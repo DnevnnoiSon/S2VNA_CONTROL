@@ -20,6 +20,9 @@ void MainWindow::InitUI(){
     communicator = new SocketCommunication(this);
     //График ВАЦ [полученные с S2VNA параметры]
     plotter = new SParameterPlotter(this);
+    ui->frame_6->setLayout(new QVBoxLayout());
+    ui->frame_6->layout()->addWidget(plotter);
+    ui->frame_6->layout()->setContentsMargins(0, 0, 0, 0);
 }
 
 //========================Установка стилей ==========================//

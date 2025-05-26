@@ -51,9 +51,9 @@ void MainWindow::ApplyStyles()
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::SetupConnections(){
     // Нажатие Измерить --> Валидация даннных конфигурации ВАЦ
-    connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
+//    connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
     // Нажатие Обновить --> Валидация настроек сетевого подключения
-    connect(ui->updateButton,&QPushButton::clicked, this, &MainWindow::on_updateButton_clicked);
+//    connect(ui->updateButton,&QPushButton::clicked, this, &MainWindow::on_updateButton_clicked);
     // Изменение статуса хоста --> Кнопка измерить в зеленный цвет
     connect(communicator, &ICommunication::deviceStatusChanged,
     this, &MainWindow::onDeviceStatusChanged, Qt::QueuedConnection);

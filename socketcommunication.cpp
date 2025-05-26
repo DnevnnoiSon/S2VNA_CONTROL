@@ -41,6 +41,7 @@ int SocketCommunication::sendCommand(const QString &command)
         emit errorOccurred("Device is not connected");
         return 1;
     }
+     qDebug() << "Sending command: " << command;
 //Отправка команды --> S2VNA
     QByteArray scpi_cmd = command.toUtf8();
 
@@ -114,11 +115,17 @@ void SocketCommunication::accept_measure_config(const QString &command)
         emit errorOccurred("communication data error");
         return;
     }
+    qDebug() << "Parsing string: " << command;
 //Парсинг на части -> отправка
-    const auto multiple_parts = command.split(';');
-    for (const auto &part : multiple_parts){
-        sendCommand(part.trimmed());
-    }
+    // const auto multiple_parts = command.split(';');
+    // for (const auto &part : multiple_parts){
+    //     sendCommand(part.trimmed());
+    // }
+    sendCommand("SENSe1:FREQuency:STARt\n");
+    sendCommand("SENSe1:FREQuency:STOP\n");
+    sendCommand("SENSe1:SWEep:POINts\n");
+    sendCommand("SOURce1:POWer\n");
+    sendCommand("CALCulate1:DATA:SDATa?\n");
 }
 
 //Отправка валидных UI настроек модулю связи:

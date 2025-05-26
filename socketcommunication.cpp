@@ -72,18 +72,26 @@ void SocketCommunication::onConnected(){   /* успешное подключе�
 //                      ПРИНЯТИЕ ДАННЫХ                             //
 //==================================================================//
 void SocketCommunication::onReadyRead(){     /* Готовность чтения[прием данных] */
+    QString response;
     responseBuffer += socket->readAll();
     qDebug() << "Response: " << responseBuffer;
     // Проверка на завершенность ответа - [\n]
     if (responseBuffer.endsWith('\n')) {
          // флаг isExpectingIDN? true -> парсинг IDN?\n /сигнал на вывод в QLabel вглавном потоке
         if(isExpectingIDN){
-            QString response = QString::fromUtf8(responseBuffer).trimmed();
-            emit idnReceived(response);
-
-            responseBuffer.clear();
+            response = QString::fromUtf8(responseBuffer).trimmed();
             isExpectingIDN = false;
-         }
+
+            emit idnReceived(response);
+        } //Пришли другие данные:
+        else{
+            // Пришли зависимости S-параметров:
+            response = QString::fromUtf8(responseBuffer).trimmed();
+            if(!response.isEmpty()) {
+                emit sParamsReceived(response);
+            }
+        }
+        responseBuffer.clear();
     }
     else{
        //сообщение неоконченно, требуется кэширование:

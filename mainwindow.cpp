@@ -37,8 +37,8 @@ void MainWindow::ApplyStyles()
     // Кнопки:
     ui->decoreButton->setFlat(true);
     ui->decoreButton->setStyleSheet("background: transparent; border: none;");
-    ui->networkButton->setFlat(true);
-    ui->networkButton->setStyleSheet("background: transparent; border: none;");
+    ui->settingButton->setFlat(true);
+    ui->settingButton->setStyleSheet("background: transparent; border: none;");
 
     // Cетевые настройки по умолчанию:
     ui->ipLineEdit->setText("127.0.0.1");
@@ -73,6 +73,10 @@ void MainWindow::SetupConnections(){
     // Ответ от IDN? --> Обработка/Вывод на экран
     connect(communicator, &ICommunication::idnReceived,
     this, &MainWindow::handleIdnResponse, Qt::QueuedConnection);
+
+    // Пришли данные sParams --> Вывод в график
+    connect(communicator, &SocketCommunication::sParamsReceived,
+    plotter, &SParameterPlotter::updateChart, Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow(){
@@ -142,6 +146,7 @@ void MainWindow::handleDeviceError(const QString& errorMessage){
 }
 
 void MainWindow::handleIdnResponse(const QString &idnInfo) {
+
 // Текущий ответ от устройства: "Planar, C1209, , 25.1.1/1"
     QStringList parts = idnInfo.split(',');
     if (parts.size() >= 4){

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>906</width>
+    <width>954</width>
     <height>481</height>
    </rect>
   </property>
@@ -152,7 +152,7 @@
         <rect>
          <x>0</x>
          <y>70</y>
-         <width>421</width>
+         <width>441</width>
          <height>221</height>
         </rect>
        </property>
@@ -165,7 +165,7 @@
        <widget class="QLabel" name="label">
         <property name="geometry">
          <rect>
-          <x>80</x>
+          <x>120</x>
           <y>0</y>
           <width>201</width>
           <height>31</height>
@@ -177,7 +177,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Диапазон частот [МГц]</string>
+         <string>Диапазон частот [ГГц]</string>
         </property>
        </widget>
        <widget class="QDoubleSpinBox" name="startSpinBox">
@@ -189,21 +189,27 @@
           <height>31</height>
          </rect>
         </property>
+        <property name="maximum">
+         <double>50000.000000000000000</double>
+        </property>
        </widget>
        <widget class="QDoubleSpinBox" name="endSpinBox">
         <property name="geometry">
          <rect>
-          <x>210</x>
+          <x>270</x>
           <y>40</y>
           <width>111</width>
           <height>31</height>
          </rect>
         </property>
+        <property name="maximum">
+         <double>500000.000000000000000</double>
+        </property>
        </widget>
        <widget class="QLabel" name="label_5">
         <property name="geometry">
          <rect>
-          <x>20</x>
+          <x>50</x>
           <y>170</y>
           <width>191</width>
           <height>31</height>
@@ -227,11 +233,17 @@
        <widget class="QDoubleSpinBox" name="powerSpinBox">
         <property name="geometry">
          <rect>
-          <x>240</x>
+          <x>270</x>
           <y>170</y>
-          <width>71</width>
+          <width>111</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="minimum">
+         <double>-200.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>200.000000000000000</double>
         </property>
        </widget>
        <widget class="Line" name="line_2">
@@ -239,7 +251,7 @@
          <rect>
           <x>0</x>
           <y>130</y>
-          <width>351</width>
+          <width>441</width>
           <height>41</height>
          </rect>
         </property>
@@ -250,7 +262,7 @@
        <widget class="QLabel" name="label_3">
         <property name="geometry">
          <rect>
-          <x>40</x>
+          <x>70</x>
           <y>100</y>
           <width>231</width>
           <height>31</height>
@@ -268,58 +280,14 @@
        <widget class="QSpinBox" name="stepspinBox">
         <property name="geometry">
          <rect>
-          <x>240</x>
+          <x>270</x>
           <y>100</y>
-          <width>71</width>
+          <width>111</width>
           <height>31</height>
          </rect>
         </property>
         <property name="maximum">
          <number>10000</number>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="networkButton">
-        <property name="geometry">
-         <rect>
-          <x>360</x>
-          <y>10</y>
-          <width>51</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="icons.qrc">
-          <normaloff>:/icons/setting.jpg/icons/settings.svg</normaloff>:/icons/setting.jpg/icons/settings.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-       </widget>
-       <widget class="Line" name="line_5">
-        <property name="geometry">
-         <rect>
-          <x>340</x>
-          <y>0</y>
-          <width>20</width>
-          <height>221</height>
-         </rect>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </widget>
@@ -328,7 +296,7 @@
         <rect>
          <x>0</x>
          <y>310</y>
-         <width>381</width>
+         <width>441</width>
          <height>91</height>
         </rect>
        </property>
@@ -409,9 +377,9 @@
        <widget class="QPushButton" name="updateButton">
         <property name="geometry">
          <rect>
-          <x>250</x>
+          <x>280</x>
           <y>30</y>
-          <width>88</width>
+          <width>121</width>
           <height>41</height>
          </rect>
         </property>
@@ -450,7 +418,7 @@
         <rect>
          <x>100</x>
          <y>410</y>
-         <width>331</width>
+         <width>361</width>
          <height>41</height>
         </rect>
        </property>
@@ -467,7 +435,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>441</width>
+         <width>461</width>
          <height>381</height>
         </rect>
        </property>
@@ -482,7 +450,7 @@
          <rect>
           <x>10</x>
           <y>10</y>
-          <width>421</width>
+          <width>431</width>
           <height>31</height>
          </rect>
         </property>
@@ -498,9 +466,9 @@
          </property>
          <property name="geometry">
           <rect>
-           <x>300</x>
+           <x>290</x>
            <y>-10</y>
-           <width>111</width>
+           <width>141</width>
            <height>51</height>
           </rect>
          </property>
@@ -513,8 +481,8 @@
          </property>
          <property name="iconSize">
           <size>
-           <width>100</width>
-           <height>100</height>
+           <width>130</width>
+           <height>130</height>
           </size>
          </property>
          <property name="autoDefault">
@@ -527,14 +495,45 @@
           <bool>true</bool>
          </property>
         </widget>
+        <widget class="QPushButton" name="settingButton">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>31</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="icons.qrc">
+           <normaloff>:/icons/setting.jpg/icons/settings.svg</normaloff>:/icons/setting.jpg/icons/settings.svg</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+        </widget>
        </widget>
        <widget class="QFrame" name="frame_6">
         <property name="geometry">
          <rect>
-          <x>20</x>
+          <x>10</x>
           <y>60</y>
-          <width>401</width>
-          <height>301</height>
+          <width>441</width>
+          <height>311</height>
          </rect>
         </property>
         <property name="frameShape">
@@ -548,8 +547,8 @@
       <widget class="QRadioButton" name="cense1Button">
        <property name="geometry">
         <rect>
-         <x>120</x>
-         <y>380</y>
+         <x>180</x>
+         <y>390</y>
          <width>81</width>
          <height>51</height>
         </rect>
@@ -567,10 +566,10 @@
       <widget class="Line" name="line_3">
        <property name="geometry">
         <rect>
-         <x>-10</x>
-         <y>410</y>
-         <width>491</width>
-         <height>41</height>
+         <x>0</x>
+         <y>421</y>
+         <width>481</width>
+         <height>20</height>
         </rect>
        </property>
        <property name="orientation">
@@ -580,8 +579,8 @@
       <widget class="QRadioButton" name="cense2Button">
        <property name="geometry">
         <rect>
-         <x>230</x>
-         <y>390</y>
+         <x>280</x>
+         <y>400</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -593,7 +592,7 @@
       <widget class="QPushButton" name="decoreButton">
        <property name="geometry">
         <rect>
-         <x>340</x>
+         <x>360</x>
          <y>390</y>
          <width>81</width>
          <height>71</height>

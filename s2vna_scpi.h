@@ -9,7 +9,7 @@
 class S2VNA_SCPI
 { /* [1] - Парсинг scpi, [2] - Сборка scpi */
 public:
-    QVariant parseResponse(const QString& response);          // [1]
+    QVector<QPair<double, double>> parseResponse(const QString& response);          // [1]
     QString generateCommand(const QVariantMap& params) const; // [2]
 };
 

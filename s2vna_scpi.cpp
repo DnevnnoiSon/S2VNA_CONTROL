@@ -1,6 +1,6 @@
 #include "s2vna_scpi.h"
 
-QVariant S2VNA_SCPI::parseResponse(const QString& response)
+QVector<QPair<double, double>> S2VNA_SCPI::parseResponse(const QString& response)
 {
     QVector<QPair<double, double>> sParams;
     QStringList parts = response.split(',');
@@ -8,16 +8,15 @@ QVariant S2VNA_SCPI::parseResponse(const QString& response)
 // Проверка четности количества параметров:
     if (parts.size() % 2 != 0) {
     // qWarning() << "Invalid response format!";
-        return QVariant();
+        return QVector<QPair<double, double>>();
     }
-
     auto it = parts.constBegin();
     while (it != parts.constEnd()) {
         double re = (it++)->toDouble();
         double im = (it++)->toDouble();
         sParams.append({re, im});
     }
-    return QVariant::fromValue(sParams);
+    return  (sParams);
 }
 
 QString S2VNA_SCPI::generateCommand(const QVariantMap& params) const

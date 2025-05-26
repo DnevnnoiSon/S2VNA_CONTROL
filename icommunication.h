@@ -25,7 +25,9 @@ public slots:
 signals:
     void deviceStatusChanged(bool isReady);
     void errorOccurred(const QString& message);
+
     void idnReceived(const QString &idnInfo);
+    void sParamsReceived(const QString &response);
 };
 
 #endif // ICOMMUNICATION_H

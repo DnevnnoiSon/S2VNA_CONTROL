@@ -34,8 +34,8 @@ void SParameterPlotter::setupChart() {
 
 void SParameterPlotter::setupAxes() {
     // Настройка осей
-    axisX->setTitleText("Frequency, GHz");
-    axisY->setTitleText("S-Parameter, dB");
+    axisX->setTitleText("Частота, Ггц");
+    axisY->setTitleText("S-параметры, дБ");
     axisX->setLabelFormat("%.2f");
     axisY->setLabelFormat("%.1f");
 
@@ -66,9 +66,14 @@ void SParameterPlotter::setupStyle() {
 }
 
 //========== Установка графика с новыми значениями =========//
+//x — частота (ГГц),
+//y — значение S-параметра (дБ).
 void SParameterPlotter::updateChart(const QString &response) {
     series->clear();
+    //парсинг scpi модулем: возвр. QVector<pair>
     const auto sParams = scpi.parseResponse(response);
+
+     qDebug() << "Otladka Zoom - Parsed sParams:" << sParams; //!проверка парсера
 
     if (sParams.isEmpty()) {
         qWarning() << "Invalid or empty S-parameters data";
@@ -86,13 +91,20 @@ void SParameterPlotter::updateChart(const QString &response) {
         minY = qMin(minY, y);
         maxY = qMax(maxY, y);
     }
+    //коэф. чтобы точки не были на краю:
+    const double marginX = (maxX - minX < 1e-6) ? 0.1 : 0.05;
+    const double marginY = (maxY - minY < 1e-6) ? 0.1 : 0.05;
+// Обновление диапазонов осей:
+    axisX->setRange(minX - (maxX - minX) * marginX, maxX + (maxX - minX) * marginX);
+    axisY->setRange(minY - (maxY - minY) * marginY, maxY + (maxY - minY) * marginY);
 
-    // Обновление диапазонов осей
-    const double margin = 0.05;
-    axisX->setRange(minX - (maxX - minX) * margin,
-    maxX + (maxX - minX) * margin);
-    axisY->setRange(minY - (maxY - minY) * margin,
-    maxY + (maxY - minY) * margin);
+    // Настройка делений:
+    axisX->setTickCount(5);
+    axisY->setTickCount(5);
+
+// Формат меток:
+    axisX->setLabelFormat((maxX - minX < 1.0) ? "%.3f" : "%.1f");
+    axisY->setLabelFormat("%.2f");
 }
 
 

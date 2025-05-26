@@ -16,7 +16,7 @@ QVector<QPair<double, double>> S2VNA_SCPI::parseResponse(const QString& response
         double im = (it++)->toDouble();
         sParams.append({re, im});
     }
-    return  (sParams);
+    return sParams;
 }
 
 QString S2VNA_SCPI::generateCommand(const QList<QPair<QString, QVariant>>& params) const
@@ -27,6 +27,6 @@ QString S2VNA_SCPI::generateCommand(const QList<QPair<QString, QVariant>>& param
         // Формирование команды: "SCPI_CMD VALUE" + учитывать отсутствие VALUE:
         commands.append(value.toInt() ? QString("%1 %2").arg(key, value.toString()) : key);
     }
-    // Объеденение команд ";\n":
+    // Объеденение команд "\n;":
     return commands.join("\n;") + "\n";
 }

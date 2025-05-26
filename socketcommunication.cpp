@@ -76,17 +76,14 @@ void SocketCommunication::onReadyRead(){     /* Готовность чтени�
     responseBuffer += socket->readAll();
     qDebug() << "Response: " << responseBuffer;
     // Проверка на завершенность ответа - [\n]
-    if (responseBuffer.endsWith('\n')) {
-         // флаг isExpectingIDN? true -> парсинг IDN?\n /сигнал на вывод в QLabel вглавном потоке
-        if(isExpectingIDN){
-            response = QString::fromUtf8(responseBuffer).trimmed();
+    if (responseBuffer.endsWith('\n'))
+    {
+        response = QString::fromUtf8(responseBuffer);
+        if(isExpectingIDN ){ //Флаг ожидание IDN активен?
             isExpectingIDN = false;
-
             emit idnReceived(response);
-        } //Пришли другие данные:
-        else{
-            // Пришли зависимости S-параметров:
-            response = QString::fromUtf8(responseBuffer).trimmed();
+        }
+        else{ // Пришли зависимости S-параметров:
             if(!response.isEmpty()) {
                 emit sParamsReceived(response);
             }
@@ -99,7 +96,6 @@ void SocketCommunication::onReadyRead(){     /* Готовность чтени�
        //а может и просто ошибка:
         emit errorOccurred("Incorrect response data");
     }
-
 }
 
 void SocketCommunication::onError(){ /* Ошибка подключения */

@@ -82,7 +82,7 @@ void MainWindow::SetupConnections(){
     this, &MainWindow::handleIdnResponse, Qt::QueuedConnection);
 
     // Пришли данные sParams --> Вывод в график
-    connect(communicator, &SocketCommunication::sParamsReceived,
+    connect(communicator, &ICommunication::sParamsReceived,
     plotter, &SParameterPlotter::updateChart, Qt::QueuedConnection);
 }
 

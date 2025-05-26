@@ -121,13 +121,8 @@ void SocketCommunication::accept_measure_config(const QString &command)
     for (const auto &part : multiple_parts){
         sendCommand(part);
     }
-/*.trimmed() - !не использовать! */
-//Должно отсылаться:
-    // sendCommand("SENSe1:FREQuency:STARt\n");
-    // sendCommand("SENSe1:FREQuency:STOP\n");
-    // sendCommand("SENSe1:SWEep:POINts\n");
-    // sendCommand("SOURce1:POWer\n");
-    // sendCommand("CALCulate1:DATA:SDATa?\n");
+/*.trimmed() - !не рекомендуется использовать! */
+/* портит spci */
 }
 
 //Отправка валидных UI настроек модулю связи:

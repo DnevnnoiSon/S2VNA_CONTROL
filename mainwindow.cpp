@@ -28,6 +28,13 @@ void MainWindow::InitUI(){
 //========================Установка стилей ==========================//
 void MainWindow::ApplyStyles()
 {
+ //фрейм над графико:
+    ui->frame_5->setStyleSheet
+    ("background-color: rgb(35,35,35);"
+     "border: 1px solid rgba(255, 255, 255, 100);"
+     "border-radius: 8px;");               //метка планара:
+    ui->planarButton->setStyleSheet("border: 2px solid transparent;");
+
     //Метки:
     ui->modelLabel->setStyleSheet("color: green; font-weight: bold;");
     ui->vendorLabel->setStyleSheet("color: green; font-weight: bold;");
@@ -105,8 +112,8 @@ void MainWindow::on_measureButton_clicked()
         {"CALCulate :DATA:SDATa?", 0},  //Запрос на считывания -> [SS,частоты]..
     };
 
-// Замена пробела на SENSE0 или SENSE1 в ключах:
-    QChar replacement = ui->cense2Button->isChecked() ? '1' : '0';
+// Замена пробела на SENSE1 или SENSE2 в ключах:
+    QChar replacement = ui->cense2Button->isChecked() ? '2' : '1';
     for (auto &el : config){
         el.first.replace(' ', replacement);
     }
@@ -130,12 +137,13 @@ void MainWindow::onDeviceStatusChanged(bool isReady){
     ui->measureButton->setStyleSheet(style);
 // Доступность кнопки:
     ui->measureButton->setEnabled(isReady);
+    if(!isReady){
+        ui->modelLabel->clear();
+        ui->vendorLabel->clear();
+    }
 }
 
 void MainWindow::handleDeviceError(const QString& errorMessage){
-    ui->modelLabel->clear();
-    ui->vendorLabel->clear();
-
     statusBar()->showMessage("Status: " + errorMessage, 600);
     //ui->measureButton->setEnabled(false);
 }

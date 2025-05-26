@@ -94,10 +94,9 @@ void MainWindow::on_measureButton_clicked()
         handleDeviceError("Incorrect valid cense");
         return;
     }
-    // Мега => 1 лям:
-    double coeficent = 1000000;
+    double coeficent = 1e6; // Мега => 1 лям:
 //Ввалидные данные:
-    QVariantMap config{
+    QList<QPair<QString, QVariant>> config {
     //СОГЛАШЕНИЕ МОЕГО CONFIG КОНТЕЙНЕРА: если параметра нет - 0;
         {"SENSe :FREQuency:STARt", (ui->startSpinBox->value() * coeficent) },  // Начальная частота
         {"SENSe :FREQuency:STOP",  (ui->endSpinBox->value() * coeficent) },  // Конечная частота
@@ -105,20 +104,14 @@ void MainWindow::on_measureButton_clicked()
         {"SOURce :POWer",          ui->powerSpinBox->value()},  // Мощность
         {"CALCulate :DATA:SDATa?", 0},  //Запрос на считывания -> [SS,частоты]..
     };
-    //если не senc2, то sence1:
-    bool isAnySenc = ui->cense2Button->isChecked();
-    const QChar replacement = isAnySenc ? '1' : '0';
 
-//Валидные данные + нужный sense:
-    QVariantMap modifiedConfig;
-
-    for (const auto &[key, value] : config.asKeyValueRange()){
-        QString modifiedKey = key;
-        modifiedKey.replace(' ', replacement);
-        modifiedConfig.insert(modifiedKey, value);
+// Замена пробела на SENSE0 или SENSE1 в ключах:
+    QChar replacement = ui->cense2Button->isChecked() ? '1' : '0';
+    for (auto &el : config){
+        el.first.replace(' ', replacement);
     }
 //Передача в сокетный поток для отправки:
-    QString command = scpi.generateCommand(modifiedConfig); //= конвертация
+    QString command = scpi.generateCommand(config); //= конвертация
     emit transfer_measure_config(command);
 }
 

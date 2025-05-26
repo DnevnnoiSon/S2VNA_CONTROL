@@ -19,11 +19,11 @@ QVector<QPair<double, double>> S2VNA_SCPI::parseResponse(const QString& response
     return  (sParams);
 }
 
-QString S2VNA_SCPI::generateCommand(const QVariantMap& params) const
+QString S2VNA_SCPI::generateCommand(const QList<QPair<QString, QVariant>>& params) const
 { // Команда - ключ, Значение - строка
     QStringList commands;
 
-    for (const auto &[key, value] : params.toStdMap()) {
+    for (const auto &[key, value] : params) {
         // Формирование команды: "SCPI_CMD VALUE" + учитывать отсутствие VALUE:
         commands.append(value.toInt() ? QString("%1 %2").arg(key, value.toString()) : key);
     }

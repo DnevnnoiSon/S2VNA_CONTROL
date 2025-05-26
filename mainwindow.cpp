@@ -94,11 +94,13 @@ void MainWindow::on_measureButton_clicked()
         handleDeviceError("Incorrect valid cense");
         return;
     }
+    // Мега => 1 лям:
+    double coeficent = 1000000;
 //Ввалидные данные:
     QVariantMap config{
     //СОГЛАШЕНИЕ МОЕГО CONFIG КОНТЕЙНЕРА: если параметра нет - 0;
-        {"SENSe :FREQuency:STARt", ui->startSpinBox->value()},  // Начальная частота
-        {"SENSe :FREQuency:STOP",  ui->endSpinBox->value()  },  // Конечная частота
+        {"SENSe :FREQuency:STARt", (ui->startSpinBox->value() * coeficent) },  // Начальная частота
+        {"SENSe :FREQuency:STOP",  (ui->endSpinBox->value() * coeficent) },  // Конечная частота
         {"SENSe :SWEep:POINts", ui->stepspinBox->value() },     // Кол-во точек
         {"SOURce :POWer",          ui->powerSpinBox->value()},  // Мощность
         {"CALCulate :DATA:SDATa?", 0},  //Запрос на считывания -> [SS,частоты]..

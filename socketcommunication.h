@@ -36,7 +36,9 @@ private slots:
     void onError();
 
 private:
-    volatile int port;
+//Настройка соединения по умолчанию:
+    int port = 5025;
+    QHostAddress targetAddress = QHostAddress::LocalHost;
 //Буффер для накопления принятых данных:
     QByteArray responseBuffer;
 

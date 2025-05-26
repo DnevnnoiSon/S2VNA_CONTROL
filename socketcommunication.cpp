@@ -9,9 +9,8 @@ SocketCommunication::SocketCommunication(QObject *parent): ICommunication(parent
         pollTimer.reset(new QTimer());
 
         // Настройка соединения - периодический опрос
-        port = 5025;
         connect(pollTimer.get(), &QTimer::timeout, this, [this]() {
-            socket->connectToHost(QHostAddress::LocalHost, port);
+            socket->connectToHost(targetAddress, port);
             socket->waitForConnected(500);
         }, Qt::QueuedConnection);
 
@@ -133,7 +132,7 @@ void SocketCommunication::accept_setting_config(const Settings &setting)
          emit errorOccurred("Settings update error");
     }
     // Обновление параметров подключения:
-    QHostAddress targetAddress(setting.network.ip_addr);
+    targetAddress.setAddress(setting.network.ip_addr);
     port = setting.network.port;
 
     if (targetAddress.isNull()) {

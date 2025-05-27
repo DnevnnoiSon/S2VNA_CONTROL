@@ -1,11 +1,13 @@
 #include "s2vna_scpi.h"
 
+//приходящие данные соотв. эксп. нотации:
 QVector<QPair<double, double>> S2VNA_SCPI::parseResponse(const QString& response)
 {
     QVector<QPair<double, double>> sParams;
     QStringList parts = response.split(',');
-    //удаление всех '+':
+
     for(auto &el : parts){
+        // удаление всех '+':
         el.replace("+", "");
     }
 

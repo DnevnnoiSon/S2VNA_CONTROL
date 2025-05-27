@@ -1,3 +1,9 @@
+*.pro.user
+*.user
+*.dll
+*.exe
+icon.qrc
+
 build/
 .metadata/
 

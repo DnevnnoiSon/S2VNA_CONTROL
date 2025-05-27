@@ -523,6 +523,9 @@
            <pointsize>14</pointsize>
           </font>
          </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
+         </property>
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>

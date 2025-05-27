@@ -118,7 +118,7 @@ void SocketCommunication::accept_measure_config(const QString &command)
         sendCommand(part);
     }
 /*.trimmed() - !не рекомендуется использовать! */
-/* портит spci */
+/* портит scpi */
 }
 
 //Отправка валидных UI настроек модулю связи:

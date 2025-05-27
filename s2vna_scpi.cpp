@@ -4,6 +4,10 @@ QVector<QPair<double, double>> S2VNA_SCPI::parseResponse(const QString& response
 {
     QVector<QPair<double, double>> sParams;
     QStringList parts = response.split(',');
+    //удаление всех '+':
+    for(auto &el : parts){
+        el.replace("+", "");
+    }
 
 // Проверка четности количества параметров:
     if (parts.size() % 2 != 0) {

@@ -15,7 +15,7 @@
 
 ![image](https://github.com/user-attachments/assets/ea1f4c14-5114-4e91-9413-49f8f6eb4025)
 
-## ⚔️ Общая Логика работы:
+## ⚔️ Модульная структура проекта:
 
 ![photo_2025-05-28_10-49-41](https://github.com/user-attachments/assets/0f0fd4e0-9079-4c37-b9bf-212518eab611)
 

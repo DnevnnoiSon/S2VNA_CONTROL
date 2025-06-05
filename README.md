@@ -24,7 +24,7 @@
 
 ---
 
-## ⚙️ [ Последующие версии хранятся в /PUB ]
+## ⚙️ [ ПОДРОБНАЯ ИНФОРМАЦИЯ В /PUB ]
 
 ## 📎 Полезные ссылки [Руководство по эксплуатации S2VNA + система команд]
 https://planarchel.ru/catalog/analizatory_tsepey_vektornye/po_vna/

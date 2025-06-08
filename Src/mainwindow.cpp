@@ -113,7 +113,13 @@ void MainWindow::on_measureButton_clicked()
 
 //Передача в сокетный поток для отправки:
     QString command = scpi.generateCommand(config); //= конвертация
-//Формирование шага частоты
+//Формирование шага частоты, заполнение шагом
+    double frequency_step = (( ui->endSpinBox->value() - ui->startSpinBox->value() ) * coeficent) / ui->pointspinBox->value();
+    int index = 1;
+    for(auto &el : scpi.Frequency){
+        el = (ui->startSpinBox->value() * coeficent) + (index * frequency_step);
+        index++;
+    }
 
     emit transfer_measure_config(command);
 }

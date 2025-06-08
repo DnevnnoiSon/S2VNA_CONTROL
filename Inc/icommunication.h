@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVector>
 
-#include "ValidSettings.h"
+#include "connectionSettings.h"
 
 //Модуль связи с хостом:
 class ICommunication : public QObject {
@@ -21,7 +21,7 @@ public:
 public slots:
 // Передача валидных данных модулю связи:
     virtual void accept_measure_config(const QString& command) = 0;
-    virtual void accept_setting_config(  const Settings &setting) = 0;
+    virtual void accept_setting_config(  const ConnectionSettings &setting) = 0;
 signals:
     void deviceStatusChanged(bool isReady);
     void errorOccurred(const QString& message);

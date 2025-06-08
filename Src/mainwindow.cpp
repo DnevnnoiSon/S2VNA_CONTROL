@@ -42,8 +42,6 @@ void MainWindow::ApplyStyles()
     ui->vendorLabel->clear();
 
     // Кнопки:
-    ui->decoreButton->setFlat(true);
-    ui->decoreButton->setStyleSheet("background: transparent; border: none;");
     ui->settingButton->setFlat(true);
     ui->settingButton->setStyleSheet("background: transparent; border: none;");
 
@@ -97,33 +95,24 @@ void MainWindow::on_measureButton_clicked()
     {
         handleDeviceError("Incorrect valid parameters");
     }
-    if (!ui->cense1Button->isChecked() && !ui->cense2Button->isChecked()) {
-        handleDeviceError("Incorrect valid cense");
-        return;
-    }
     double coeficent = 1e6; // Мега => 1 лям:
 //Ввалидные данные:
     QList<QPair<QString, QVariant>> config {
     //СОГЛАШЕНИЕ МОЕГО CONFIG КОНТЕЙНЕРА: если параметра нет - 0;
-        {"SENSe :FREQuency:STARt", (ui->startSpinBox->value() * coeficent) },  // Начальная частота
-        {"SENSe :FREQuency:STOP",  (ui->endSpinBox->value() * coeficent) },  // Конечная частота
-        {"SENSe :SWEep:POINts", ui->stepspinBox->value() },     // Кол-во точек
-        {"SOURce :POWer",          ui->powerSpinBox->value()},  // Мощность
-        {"CALCulate :DATA:SDATa?", 0},  //Запрос на считывания -> [SS,частоты]..
+        {"SENSe:FREQuency:STARt", (ui->startSpinBox->value() * coeficent) },  // Начальная частота
+        {"SENSe:FREQuency:STOP",  (ui->endSpinBox->value() * coeficent) },  // Конечная частота
+        {"SENSe:SWEep:POINts", ui->stepspinBox->value() },     // Кол-во точек
+        {"SOURce:POWer",          ui->powerSpinBox->value()},  // Мощность
+        {"CALCulate:DATA:SDATa?", 0},  //Запрос на считывания -> [SS,частоты]..
     };
 
-// Замена пробела на SENSE1 или SENSE2 в ключах:
-    QChar replacement = ui->cense2Button->isChecked() ? '2' : '1';
-    for (auto &el : config){
-        el.first.replace(' ', replacement);
-    }
 //Передача в сокетный поток для отправки:
     QString command = scpi.generateCommand(config); //= конвертация
     emit transfer_measure_config(command);
 }
 
 void MainWindow::on_updateButton_clicked(){
-    Settings setting;
+    ConnectionSettings setting;
     //Настройка сетевого подключения:
     setting.network.ip_addr = ui->ipLineEdit->text();
     setting.network.port = ui->portSpinBox->value();

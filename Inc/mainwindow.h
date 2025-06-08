@@ -11,7 +11,7 @@
 
 #include "icommunication.h"
 #include "s2vna_scpi.h"
-#include "ValidSettings.h"
+#include "connectionSettings.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,7 +26,7 @@ public:
 
 signals:
     void transfer_measure_config(const QString &command);
-    void transfer_setting_config(const Settings &setting);
+    void transfer_setting_config(const ConnectionSettings &setting);
 private slots:
     void on_measureButton_clicked();
     void on_updateButton_clicked();

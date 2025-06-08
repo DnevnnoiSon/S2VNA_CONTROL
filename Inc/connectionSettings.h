@@ -1,5 +1,5 @@
-#ifndef VALIDSETTINGS_H
-#define VALIDSETTINGS_H
+#ifndef CONNECTIONSETTINGS_H
+#define CONNECTIONSETTINGS_H
 
 #include <QVariantMap>
 
@@ -8,11 +8,12 @@ struct Network{
     int port;
 };
 
-class Settings{
+class ConnectionSettings{
 public:
 /* Для socket взаимодействия: */
     Network network;
 //Другие типы соединения:
 };
 
-#endif // VALIDSETTINGS_H
+#endif // CONNECTIONSETTINGS_H
+

@@ -122,7 +122,7 @@ void SocketCommunication::accept_measure_config(const QString &command)
 }
 
 //Отправка валидных UI настроек модулю связи:
-void SocketCommunication::accept_setting_config(const Settings &setting)
+void SocketCommunication::accept_setting_config(const ConnectionSettings &setting)
 {
     stopPolling();
     if (socket->state() == QAbstractSocket::ConnectedState) {

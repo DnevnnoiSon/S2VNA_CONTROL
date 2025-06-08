@@ -15,7 +15,7 @@ SOURCES += \
    Src/sparameterplotter.cpp
 
 HEADERS += \
-   Inc/ValidSettings.h \
+   Inc/connectionSettings.h \
    Inc/icommunication.h \
    Inc/mainwindow.h \
    Inc/s2vna_scpi.h \

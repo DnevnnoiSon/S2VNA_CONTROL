@@ -10,6 +10,18 @@
     <height>481</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>954</width>
+    <height>481</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>954</width>
+    <height>481</height>
+   </size>
+  </property>
   <property name="mouseTracking">
    <bool>false</bool>
   </property>
@@ -277,7 +289,7 @@
          <string>Количество  точек:</string>
         </property>
        </widget>
-       <widget class="QSpinBox" name="stepspinBox">
+       <widget class="QSpinBox" name="pointspinBox">
         <property name="geometry">
          <rect>
           <x>270</x>

@@ -1,9 +1,10 @@
 #include "s2vna_scpi.h"
 
-//приходящие данные соотв. эксп. нотации:
-QVector<QPair<double, double>> S2VNA_SCPI::parseResponse(const QString& response)
+//вх. данные соотв. эксп. нотации: [действительная часть, мнимая часть]
+//вых. данные: Вектор[  [действительная часть, мнимая часть], частота  ]
+QVector<QPair<QPair<double, double>, double>> S2VNA_SCPI::parseResponse(const QString& response)
 {
-    QVector<QPair<double, double>> sParams;
+    QVector<QPair<QPair<double, double>, double>> sParams;
     QStringList parts = response.split(',');
 
     for(auto &el : parts){
@@ -14,13 +15,13 @@ QVector<QPair<double, double>> S2VNA_SCPI::parseResponse(const QString& response
 // Проверка четности количества параметров:
     if (parts.size() % 2 != 0) {
     // qWarning() << "Invalid response format!";
-        return QVector<QPair<double, double>>();
+        return QVector<QPair<QPair<double, double>, double>>();
     }
-    auto it = parts.constBegin();
-    while (it != parts.constEnd()) {
-        double re = (it++)->toDouble();
-        double im = (it++)->toDouble();
-        sParams.append({re, im});
+    auto it_x = Frequency.constBegin();
+    auto it_y = parts.constBegin();
+    while (it_y != parts.constEnd()) {
+    //================ [ [действительная часть, мнимая часть        ],  частота  ] ====//
+        sParams.append({ {(it_y++)->toDouble(), (it_y++)->toDouble()}, *(it_x++) });
     }
     return sParams;
 }

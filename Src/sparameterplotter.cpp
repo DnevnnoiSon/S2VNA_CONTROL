@@ -34,7 +34,7 @@ void SParameterPlotter::setupChart() {
 
 void SParameterPlotter::setupAxes() {
     // Настройка осей
-    axisX->setTitleText("Частота, Ггц");
+    axisX->setTitleText("Частота, Мгц");
     axisY->setTitleText("S-параметры, дБ");
     axisX->setLabelFormat("%.2f");
     axisY->setLabelFormat("%.1f");
@@ -66,7 +66,7 @@ void SParameterPlotter::setupStyle() {
 }
 
 //========== Установка графика с новыми значениями =========//
-//x — частота (ГГц),
+//x — частота (МГц),
 //y — значение S-параметра (дБ).
 void SParameterPlotter::updateChart(const QString &response) {
     series->clear();

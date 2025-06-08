@@ -94,6 +94,11 @@ void MainWindow::on_measureButton_clicked()
         (ui->powerSpinBox->value() > MAX_POWER) )
     {
         handleDeviceError("Incorrect valid parameters");
+        return;
+    }
+    if(ui->pointspinBox->value() <= 1){
+        handleDeviceError("Incorrect valid parameters");
+        return;
     }
     double coeficent = 1e6; // Мега => 1 лям:
 //Ввалидные данные:
@@ -101,13 +106,15 @@ void MainWindow::on_measureButton_clicked()
     //СОГЛАШЕНИЕ МОЕГО CONFIG КОНТЕЙНЕРА: если параметра нет - 0;
         {"SENSe:FREQuency:STARt", (ui->startSpinBox->value() * coeficent) },  // Начальная частота
         {"SENSe:FREQuency:STOP",  (ui->endSpinBox->value() * coeficent) },  // Конечная частота
-        {"SENSe:SWEep:POINts", ui->stepspinBox->value() },     // Кол-во точек
+        {"SENSe:SWEep:POINts", ui->pointspinBox->value() },     // Кол-во точек
         {"SOURce:POWer",          ui->powerSpinBox->value()},  // Мощность
         {"CALCulate:DATA:SDATa?", 0},  //Запрос на считывания -> [SS,частоты]..
     };
 
 //Передача в сокетный поток для отправки:
     QString command = scpi.generateCommand(config); //= конвертация
+//Формирование шага частоты
+
     emit transfer_measure_config(command);
 }
 

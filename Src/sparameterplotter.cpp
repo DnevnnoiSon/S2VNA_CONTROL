@@ -65,46 +65,79 @@ void SParameterPlotter::setupStyle() {
         );
 }
 
+void SParameterPlotter::setFrequencyData(const QVector<double>& frequencies) {
+    scpi.Frequency = frequencies;
+}
+
 //========== Установка графика с новыми значениями =========//
 //x — частота (МГц),
 //y — значение S-параметра (дБ).
 void SParameterPlotter::updateChart(const QString &response) {
-    series->clear();
-    //парсинг scpi модулем: возвр. QVector<pair>
-    const auto sParams = scpi.parseResponse(response);
-
-     qDebug() << "Otladka Zoom - Parsed sParams:" << sParams; //!проверка парсера
-
-    if (sParams.isEmpty()) {
+    // Парсинг данных - формирование полей 0X/0Y
+    const auto coordinates = scpi.parseResponse(response, scpi.Frequency);
+    if (coordinates.isEmpty()) {
         qWarning() << "Invalid or empty S-parameters data";
+        series->clear();
         return;
     }
 
-    // Расчет min/max
-    double minX = sParams.first().first, maxX = minX;
-    double minY = sParams.first().second, maxY = minY;
-
-    for (const auto &[x, y] : sParams) {
-        series->append(x, y);
-        minX = qMin(minX, x);
-        maxX = qMax(maxX, x);
-        minY = qMin(minY, y);
-        maxY = qMax(maxY, y);
+    for(const auto &el : coordinates){
+        qDebug() << "Otladka Zoom - Parsed sParams:" << el; //!проверка парсера
     }
-    //коэф. чтобы точки не были на краю:
-    const double marginX = (maxX - minX < 1e-6) ? 0.1 : 0.05;
-    const double marginY = (maxY - minY < 1e-6) ? 0.1 : 0.05;
-// Обновление диапазонов осей:
-    axisX->setRange(minX - (maxX - minX) * marginX, maxX + (maxX - minX) * marginX);
-    axisY->setRange(minY - (maxY - minY) * marginY, maxY + (maxY - minY) * marginY);
 
-    // Настройка делений:
+
+    // Подготовка контейнера для точек
+    QVector<QPointF> points;
+    points.reserve(coordinates.size());
+
+    // Вычисление границ
+    double minX = std::numeric_limits<double>::max();
+    double maxX = std::numeric_limits<double>::lowest();
+    double minY = std::numeric_limits<double>::max();
+    double maxY = std::numeric_limits<double>::lowest();
+
+    // Единый проход для преобразования данных и вычисления min/max
+    for (const auto &[complex, freq] : coordinates) {
+        const double real = complex.first;
+        const double imag = complex.second;
+
+        // Вычисление амплитуды в дБ
+        const double magnitude = std::hypot(real, imag);
+        const double dB = 20 * std::log10(magnitude);
+
+        // Обновление границ
+        minX = std::min(minX, freq);
+        maxX = std::max(maxX, freq);
+        minY = std::min(minY, dB);
+        maxY = std::max(maxY, dB);
+
+        points.append({freq, dB});
+    }
+
+// Обновление серии за один вызов
+    series->replace(points);
+
+    // Корректировка границ при одинаковых значениях
+    const auto adjustRange = [](double min, double max) -> std::pair<double, double> {
+        if (qFuzzyCompare(min, max)) {
+            return {min - 1.0, max + 1.0};
+        }
+        const double margin = 0.05 * (max - min);
+        return {min - margin, max + margin};
+    };
+
+    const auto [xMin, xMax] = adjustRange(minX, maxX);
+    const auto [yMin, yMax] = adjustRange(minY, maxY);
+
+    // Установка диапазонов осей
+    axisX->setRange(xMin, xMax);
+    axisY->setRange(yMin, yMax);
+
+    // Настройка форматов
+    axisX->setLabelFormat((maxX - minX < 1.0) ? "%.3f" : "%.1f");
+    axisY->setLabelFormat("%.1f");
     axisX->setTickCount(5);
     axisY->setTickCount(5);
-
-// Формат меток:
-    axisX->setLabelFormat((maxX - minX < 1.0) ? "%.3f" : "%.1f");
-    axisY->setLabelFormat("%.2f");
 }
 
 

@@ -10,6 +10,8 @@ class SParameterPlotter : public QWidget
     Q_OBJECT
 public:
     explicit SParameterPlotter(QWidget *parent = nullptr);
+
+    void setFrequencyData(const QVector<double>& frequencies);
 public slots:
     void updateChart(const QString &response);
 private:

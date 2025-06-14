@@ -82,7 +82,7 @@ void SParameterPlotter::updateChart(const QString &response) {
     }
 
     for(const auto &el : coordinates){
-        qDebug() << "Otladka Zoom - Parsed sParams:" << el; //!проверка парсера
+        qDebug() << "Parsed sParams:" << el; //!проверка парсера
     }
 
 

@@ -119,10 +119,12 @@ void MainWindow::on_measureButton_clicked()
     double frequency_step = (( ui->endSpinBox->value() - ui->startSpinBox->value() ) * coeficent) / (ui->pointspinBox->value() - 1);
     double frequency_el = (ui->startSpinBox->value() * coeficent);
 
-    for(int index = 0; index < ui->endSpinBox->value() - ui->startSpinBox->value(); index++){
+    for(int index = 0; index < ui->pointspinBox->value(); index++){
         scpi.Frequency.append(frequency_el);
         frequency_el += frequency_step;
     }
+
+    qWarning() << "Frequency points: " << scpi.Frequency.size();
     // Передача частоты для последующей отрисовки на графике
     plotter->setFrequencyData(scpi.Frequency);
 

@@ -15,13 +15,15 @@ QVector<QPair<QPair<double, double>, double>> S2VNA_SCPI::parseResponse(const QS
     }
 
     if( (parts.size() / 2) != frequency.size() ){
-        qWarning() << "Frequency size != Sparam size --> Cordinates unncorect!";
+        qWarning() << "Frequency size is " << frequency.size();
+        qWarning() << "Sparams size is " << parts.size() / 2;
+        return Сoordinates;
     }
 
 // Проверка четности количества параметров:
     if (parts.size() % 2 != 0 ) {
         qWarning() << "Invalid response format!";
-        return QVector<QPair<QPair<double, double>, double>>();
+        return Сoordinates;
     }
     auto it_x = frequency.constBegin();
     auto it_y = parts.constBegin();

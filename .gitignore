@@ -2,6 +2,7 @@
 *.user
 *.dll
 *.exe
+*.stash
 icon.qrc
 
 build/

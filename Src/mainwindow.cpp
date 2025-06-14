@@ -56,9 +56,8 @@ void MainWindow::ApplyStyles()
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::SetupConnections(){
     // Нажатие Измерить --> Валидация даннных конфигурации ВАЦ
-//    connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
     // Нажатие Обновить --> Валидация настроек сетевого подключения
-//    connect(ui->updateButton,&QPushButton::clicked, this, &MainWindow::on_updateButton_clicked);
+
     // Изменение статуса хоста --> Кнопка измерить в зеленный цвет
     connect(communicator, &ICommunication::deviceStatusChanged,
     this, &MainWindow::onDeviceStatusChanged, Qt::QueuedConnection);
@@ -146,6 +145,8 @@ void MainWindow::onDeviceStatusChanged(bool isReady){
     ui->measureButton->setStyleSheet(style);
 // Доступность кнопки:
     ui->measureButton->setEnabled(isReady);
+    ui->loadButton->setEnabled(isReady);
+    ui->saveButton->setEnabled(isReady);
     if(!isReady){
         ui->modelLabel->clear();
         ui->vendorLabel->clear();

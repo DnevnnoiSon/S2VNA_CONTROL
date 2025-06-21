@@ -1,19 +1,27 @@
 #ifndef CONNECTIONSETTINGS_H
 #define CONNECTIONSETTINGS_H
 
-#include <QVariantMap>
+#include <QString>
 
-struct Network{
-    QString ip_addr;
-    int port;
+/**
+ * @brief Структура для хранения сетевых параметров подключения.
+ */
+struct Network {
+    QString ip_addr; ///< IP-адрес хоста.
+    int port;        ///< Порт для подключения.
 };
 
-class ConnectionSettings{
+/**
+ * @brief Класс-контейнер для хранения всех настроек подключения.
+ * @details Может быть расширен для поддержки других типов соединений (COM, USB и т.д.).
+ */
+class ConnectionSettings {
 public:
-/* Для socket взаимодействия: */
+    /** @brief Настройки для TCP/IP сокетного взаимодействия. */
     Network network;
-//Другие типы соединения:
+
+    // Здесь можно добавить другие типы настроек, например:
+    // SerialPortSettings serial;
 };
 
 #endif // CONNECTIONSETTINGS_H
-

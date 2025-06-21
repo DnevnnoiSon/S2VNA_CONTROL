@@ -2,55 +2,96 @@
 #define SOCKETCOMMUNICATION_H
 
 #include "icommunication.h"
-
 #include <QTcpSocket>
-#include <QThread>
 #include <QTimer>
 #include <memory>
-//==================================================================//
-//    Модуль связи с хостом через сокеты [S2VNA поток].             //
-//    Входным параметром является сконвертированная в scpi команда. //
-//==================================================================//
-using namespace std;
 
-class SocketCommunication : public ICommunication
-{
+/**
+ * @brief Реализация интерфейса ICommunication для связи через TCP/IP сокеты.
+ * @details Управляет подключением, отправкой/приемом данных и переподключением
+ * в случае потери связи с хостом.
+ */
+class SocketCommunication : public ICommunication {
     Q_OBJECT
 public:
+    /**
+     * @brief Конструктор класса.
+     * @param parent Родительский объект QObject.
+     */
     explicit SocketCommunication(QObject *parent = nullptr);
-    ~SocketCommunication();
 
+    /**
+     * @brief Деструктор.
+     */
+    ~SocketCommunication() override;
+
+    /**
+     * @brief @copydoc ICommunication::sendCommand
+     */
     int sendCommand(const QString &command) override;
 
+    /**
+     * @brief @copydoc ICommunication::connectToDevice
+     */
     void connectToDevice() override;
-// При подключении к хосту: [периодическая идиентификация -> pollTimer]
+
+    /**
+     * @brief @copydoc ICommunication::startPolling
+     */
     void startPolling() override;
+
+    /**
+     * @brief @copydoc ICommunication::stopPolling
+     */
     void stopPolling() override;
+
 public slots:
-//принятие валидных данных с GUI потока:
-    void accept_measure_config(const QString &command) override;
-    void accept_setting_config(const ConnectionSettings &setting) override;
+    /**
+     * @brief @copydoc ICommunication::acceptMeasureConfig
+     */
+    void acceptMeasureConfig(const QString &command) override;
+
+    /**
+     * @brief @copydoc ICommunication::acceptSettingConfig
+     */
+    void acceptSettingConfig(const ConnectionSettings &setting) override;
+
 private slots:
+    /**
+     * @brief Слот, вызываемый при готовности сокета к чтению данных.
+     */
     void onReadyRead();
+
+    /**
+     * @brief Слот, вызываемый при успешном установлении соединения.
+     */
     void onConnected();
-    void onError();
+
+    /**
+     * @brief Слот, вызываемый при разрыве соединения.
+     */
+    void onDisconnected();
+
+    /**
+     * @brief Слот для обработки ошибок сокета.
+     * @param socketError Код ошибки сокета.
+     */
+    void onErrorOccurred(QAbstractSocket::SocketError socketError);
+
+    /**
+     * @brief Выполняет попытку подключения к хосту.
+     */
+    void attemptConnection();
 
 private:
-//Настройка соединения по умолчанию:
-    int port = 5025;
-    QHostAddress targetAddress = QHostAddress::LocalHost;
-//Буффер для накопления принятых данных:
-    QByteArray responseBuffer;
+    ConnectionSettings m_settings; ///< Текущие настройки подключения.
 
-    unique_ptr<QTcpSocket> socket;
-    unique_ptr<QThread> thread;
+    std::unique_ptr<QTcpSocket> m_socket; ///< Умный указатель на TCP сокет.
+    QByteArray m_responseBuffer;          ///< Буфер для накопления данных из сокета.
 
-//Периодический опрос состояния:
-    unique_ptr<QTimer> pollTimer;  // Таймер для периодического опроса [идиентификация]
-    bool isDeviceReady = false;    // Флаг готовности устройства [сокетное подключение]
-    bool isExpectingIDN = false;   // Флаг ожидания ответа от  *IDN?
+    std::unique_ptr<QTimer> m_pollTimer; ///< Таймер для периодических попыток переподключения.
+
+    bool m_isExpectingIDN = false; ///< Флаг, указывающий на ожидание ответа *IDN?.
 };
 
 #endif // SOCKETCOMMUNICATION_H
-
-

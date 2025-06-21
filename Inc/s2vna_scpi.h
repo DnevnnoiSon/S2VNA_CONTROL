@@ -2,20 +2,32 @@
 #define S2VNA_SCPI_H
 
 #include <QVariant>
-#include <QVariantMap>
 #include <QString>
-#include <QStringList>
+#include <QVector>
+#include <QPair>
 
-//==================================================================//
-//     SPCI Прослойка между [Интерфейсом Связи] и [GUI]             //
-//==================================================================//
-class S2VNA_SCPI
-{ /* [1] - Парсинг scpi, [2] - Сборка scpi */
+/**
+ * @brief Класс-прослойка для работы с SCPI-командами.
+ * @details Отвечает за две основные задачи:
+ * 1. Генерация SCPI-команд из параметров, заданных в GUI.
+ * 2. Парсинг ответов от устройства (в частности, S-параметров).
+ */
+class S2VNA_SCPI {
 public:
-    QVector<QPair<QPair<double, double>, double>> parseResponse(const QString& response, const QVector<double>& Frequency);  // [1]
-    QString generateCommand(const QList<QPair<QString, QVariant>>& params) const;                                            // [2]
-    //Вых. параметр частоты для парсера.
-    QVector<double> Frequency;
+    /**
+     * @brief Парсит строку ответа с S-параметрами.
+     * @param response Строка ответа от устройства, содержащая пары (real, imag).
+     * @param frequency Вектор частот, соответствующий полученным S-параметрам.
+     * @return Вектор пар, где каждая пара содержит { {real, imag}, частота }.
+     */
+    QVector<QPair<QPair<double, double>, double>> parseResponse(const QString& response, const QVector<double>& frequency);
+
+    /**
+     * @brief Генерирует строку SCPI-команд из списка параметров.
+     * @param params Список пар "Команда-Значение".
+     * @return Отформатированная строка SCPI-команд, готовая к отправке.
+     */
+    QString generateCommand(const QList<QPair<QString, QVariant>>& params) const;
 };
 
 #endif // S2VNA_SCPI_H

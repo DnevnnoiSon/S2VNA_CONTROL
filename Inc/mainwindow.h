@@ -2,53 +2,95 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QObject>
-#include <QLabel>
-#include <QChart>
-#include <QVector>
+#include <memory>
 
-#include "sparameterplotter.h"
+// Прямые объявления для уменьшения зависимостей в заголовках
+namespace Ui {
+class MainWindow;
+}
+class SParameterPlotter;
+class ICommunication;
+struct ConnectionSettings;
 
-#include "icommunication.h"
-#include "s2vna_scpi.h"
-#include "connectionSettings.h"
-
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
-{
+/**
+ * @brief Главное окно приложения.
+ * @details Отвечает за компоновку UI, обработку действий пользователя и
+ * взаимодействие между модулем связи и модулем отрисовки графика.
+ */
+class MainWindow : public QMainWindow {
     Q_OBJECT
+
 public:
-    MainWindow(QWidget *parent = nullptr);
+    /**
+     * @brief Конструктор главного окна.
+     * @param parent Родительский виджет.
+     */
+    explicit MainWindow(QWidget *parent = nullptr);
+
+    /**
+     * @brief Деструктор.
+     */
     ~MainWindow();
 
 signals:
-    void transfer_measure_config(const QString &command);
-    void transfer_setting_config(const ConnectionSettings &setting);
+    /**
+     * @brief Сигнал для передачи конфигурации измерения в модуль связи.
+     * @param command Готовая SCPI-команда.
+     */
+    void measureConfigTransferred(const QString &command);
+
+    /**
+     * @brief Сигнал для передачи новых настроек подключения в модуль связи.
+     * @param setting Структура с новыми настройками.
+     */
+    void settingConfigTransferred(const ConnectionSettings &setting);
+
 private slots:
+    /**
+     * @brief Слот, обрабатывающий нажатие на кнопку "Измерить".
+     */
     void on_measureButton_clicked();
+
+    /**
+     * @brief Слот, обрабатывающий нажатие на кнопку "Обновить" (настройки сети).
+     */
     void on_updateButton_clicked();
+
+    /**
+     * @brief Обновляет UI в соответствии со статусом подключения.
+     * @param isReady true, если устройство готово.
+     */
     void onDeviceStatusChanged(bool isReady);
+
+    /**
+     * @brief Отображает сообщение об ошибке в строке состояния.
+     * @param errorMessage Текст ошибки.
+     */
     void handleDeviceError(const QString& errorMessage);
 
+    /**
+     * @brief Обрабатывает и отображает идентификационную информацию устройства.
+     * @param idnInfo Ответ от устройства на команду *IDN?.
+     */
     void handleIdnResponse(const QString &idnInfo);
+
 private:
-//========= Конструкторские функции:
-    void InitUI();           // Создание виджетов
-    void ApplyStyles();      // Стилизация
-    void SetupConnections(); // Сигналы/слоты
-//========= Обьекты:
-    Ui::MainWindow *ui;
-// Ответ на IDN? - вывод на экран:
-    QLabel *deviceInfoLabel[2];
- //Обьект коммуникации:
-    ICommunication* communicator;
-//Обрабатываемое устройство SCPI: [S2VNA]
-    S2VNA_SCPI scpi;
-//Построение графика:
-    SParameterPlotter *plotter;
+    /**
+     * @brief Устанавливает все необходимые сигнально-слотовые соединения.
+     */
+    void setupConnections();
+
+    /**
+     * @brief Применяет стили и начальные настройки к виджетам.
+     */
+    void setupUiAppearance();
+
+    std::unique_ptr<Ui::MainWindow> ui; ///< Указатель на UI-компоненты, сгенерированные из .ui файла.
+
+    // SParameterPlotter создается и управляется через .ui файл (метод "promote").
+    // Указатель получаем из ui для удобства доступа.
+    SParameterPlotter* m_plotter; ///< Указатель на виджет с графиком.
+    std::unique_ptr<ICommunication> m_communicator; ///< Указатель на модуль связи.
 };
 
 #endif // MAINWINDOW_H

@@ -1,14 +1,15 @@
 #include "sparameterplotter.h"
 #include <QVBoxLayout>
-#include <limits> // Добавлено для std::numeric_limits
+#include <limits>
 
 SParameterPlotter::SParameterPlotter(QWidget *parent)
-    : QWidget(parent)
+    : QWidget(parent),
+    m_chart(std::make_unique<QChart>())
 {
-    // Инициализация объектов
-    m_chart = new QChart();
-    m_chartView = new QChartView(m_chart, this);
     m_series = new QLineSeries(this);
+
+    m_chartView = new QChartView(m_chart.get(), this);
+
     m_axisX = new QValueAxis();
     m_axisY = new QValueAxis();
     m_layout = new QVBoxLayout(this);
@@ -23,6 +24,8 @@ SParameterPlotter::SParameterPlotter(QWidget *parent)
     m_layout->addWidget(m_chartView);
     setLayout(m_layout);
 }
+
+SParameterPlotter::~SParameterPlotter() = default;
 
 void SParameterPlotter::setupChart() {
     m_chart->addSeries(m_series);
@@ -57,7 +60,7 @@ void SParameterPlotter::setupAxes() {
 }
 
 void SParameterPlotter::setupStyle() {
-    m_series->setPen(QPen(QColor("#3498db"), 2)); // Цвет линии изменен на более яркий
+    m_series->setPen(QPen(QColor("darkgreen"), 2));
     m_series->setPointsVisible(false);
 
     // Стиль для фона и рамки
@@ -74,7 +77,8 @@ void SParameterPlotter::setFrequencyData(const QVector<double>& frequencies) {
     m_frequencies = frequencies;
 }
 
-void SParameterPlotter::updateChart(const QString &response) {
+void SParameterPlotter::updateChart(const QString &response)
+{
     const auto coordinates = m_scpiParser.parseResponse(response, m_frequencies);
     if (coordinates.isEmpty()) {
         qWarning() << "Invalid or empty S-parameters data received.";
@@ -90,28 +94,32 @@ void SParameterPlotter::updateChart(const QString &response) {
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    const double mega = 1e6;
+    constexpr double MEGA = 1e6;
 
-    for (const auto &[complex, freq_hz] : coordinates) {
-        // --- ИСПРАВЛЕНО: Преобразование частоты из Гц в МГц для отображения ---
-        const double freq_mhz = freq_hz / mega;
+    for (const auto& [sparams, freq_hz] : coordinates) {
+        // [ <real, imag>, freq_hz]
+        const double freq_mhz = freq_hz / MEGA;
 
-        const double real = complex.first;
-        const double imag = complex.second;
-
-        // Вычисление амплитуды в дБ
-        const double magnitude = std::hypot(real, imag);
+        // Вычисление амплитуды в дБ. Формула была верной.
+        const double magnitude = std::hypot(sparams.first, sparams.second);
+        // Тернарный оператор для защиты от log10(0)
         const double dB = (magnitude > 0) ? (20 * std::log10(magnitude)) : -std::numeric_limits<double>::infinity();
 
-        // Обновление границ с использованием значений в МГц
+        //====== Корректность построения ======//
+        qDebug() << "Freq (MHz):" << freq_mhz
+        << "| Real:" << sparams.first
+        << "| Imag:" << sparams.second
+        << "| dB:" << dB;
+
+        points.append({freq_mhz, dB});
+
+        // Обновление границ
         minX = std::min(minX, freq_mhz);
         maxX = std::max(maxX, freq_mhz);
         if (std::isfinite(dB)) {
             minY = std::min(minY, dB);
             maxY = std::max(maxY, dB);
         }
-
-        points.append({freq_mhz, dB});
     }
 
     // Обновление серии за один вызов
@@ -123,6 +131,9 @@ void SParameterPlotter::updateChart(const QString &response) {
             return {min - 1.0, max + 1.0};
         }
         const double margin = 0.05 * (max - min);
+        if (margin < std::numeric_limits<double>::epsilon()) {
+            return {min - 1.0, max + 1.0};
+        }
         return {min - margin, max + margin};
     };
 

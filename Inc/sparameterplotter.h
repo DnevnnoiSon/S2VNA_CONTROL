@@ -9,8 +9,12 @@
 
 #include "s2vna_scpi.h"
 
-// Прямое объявление для QVBoxLayout
-class QVBoxLayout;
+QT_BEGIN_NAMESPACE
+    class QChartView;
+    class QLineSeries;
+    class QValueAxis;
+    class QVBoxLayout;
+QT_END_NAMESPACE
 
 /**
  * @brief Виджет для отображения графика S-параметров.
@@ -25,6 +29,11 @@ public:
      * @param parent Родительский виджет.
      */
     explicit SParameterPlotter(QWidget *parent = nullptr);
+
+    /**
+    * @brief Деструктор.
+    */
+     ~SParameterPlotter();
 
     /**
      * @brief Устанавливает вектор частот для последующего парсинга.
@@ -57,12 +66,13 @@ private:
     void setupStyle();
 
     // Графические компоненты
-    QChart *m_chart;          ///< Основной объект графика.
-    QChartView *m_chartView;  ///< Виджет для отображения графика.
-    QLineSeries *m_series;    ///< Серия данных для линейного графика.
-    QValueAxis *m_axisX;      ///< Ось абсцисс (частота).
-    QValueAxis *m_axisY;      ///< Ось ординат (амплитуда в дБ).
-    QVBoxLayout *m_layout;    ///< Менеджер компоновки.
+    std::unique_ptr<QChart> m_chart; ///< Основной объект графика.
+
+    QChartView *m_chartView = nullptr;  ///< Виджет для отображения графика.
+    QLineSeries *m_series = nullptr;    ///< Серия данных для линейного графика.
+    QValueAxis *m_axisX = nullptr;      ///< Ось абсцисс (частота).
+    QValueAxis *m_axisY = nullptr;      ///< Ось ординат (амплитуда в дБ).
+    QVBoxLayout *m_layout = nullptr;    ///< Менеджер компоновки.
 
     // Вспомогательные данные
     S2VNA_SCPI m_scpiParser;       ///< Объект для парсинга SCPI-ответов.

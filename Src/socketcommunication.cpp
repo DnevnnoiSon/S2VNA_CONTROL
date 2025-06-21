@@ -36,13 +36,13 @@ SocketCommunication::~SocketCommunication(){
 //==================================================================//
 int SocketCommunication::sendCommand(const QString &command)
 {
-//Проверка сетевого подключения:
+    //Проверка сетевого подключения:
     if (!socket || socket->state() != QAbstractSocket::ConnectedState){
         emit errorOccurred("Device is not connected");
         return 1;
     }
-     qDebug() << "Sending command: " << command;
-//Отправка команды --> S2VNA
+    qDebug() << "Sending command: " << command;
+    //Отправка команды --> S2VNA
     QByteArray scpi_cmd = command.toUtf8();
 
     auto result = socket->write(scpi_cmd);
@@ -54,7 +54,7 @@ int SocketCommunication::sendCommand(const QString &command)
 }
 
 void SocketCommunication::connectToDevice(){
-// Здесь будут разовые действия при самом начале подключения:
+    // Здесь будут разовые действия при самом начале подключения:
     sendCommand("*RST\n");
 }
 
@@ -62,7 +62,7 @@ void SocketCommunication::connectToDevice(){
 void SocketCommunication::onConnected(){   /* успешное подключение */
     stopPolling();
     isExpectingIDN = true;
- //Отправка команды идиентификации:
+    //Отправка команды идиентификации:
     sendCommand("*IDN?\n");
 
     emit deviceStatusChanged(true);
@@ -91,9 +91,9 @@ void SocketCommunication::onReadyRead(){     /* Готовность чтени�
         responseBuffer.clear();
     }
     else{
-       //сообщение неоконченно, требуется внутреннее кэширование:
+        //сообщение неоконченно, требуется внутреннее кэширование:
 
-       //а может и просто ошибка:
+        //а может и просто ошибка:
         emit errorOccurred("Incorrect response data");
     }
 }
@@ -105,31 +105,31 @@ void SocketCommunication::onError(){ /* Ошибка подключения */
 }
 
 //Отправка валидных UI данных:
-void SocketCommunication::accept_measure_config(const QString &command)
+void SocketCommunication::acceptMeasureConfig(const QString &command)
 {   /* Вх. данные - упакованная scpi команда */
     if (command.isEmpty()) {
         emit errorOccurred("communication data error");
         return;
     }
     qDebug() << "Parsing string: " << command;
-//Парсинг на части -> отправка
+    //Парсинг на части -> отправка
     const auto multiple_parts = command.split(';');
     for (const auto &part : multiple_parts){
         sendCommand(part);
     }
-/*.trimmed() - !не рекомендуется использовать! */
-/* портит scpi */
+    /*.trimmed() - !не рекомендуется использовать! */
+    /* портит scpi */
 }
 
 //Отправка валидных UI настроек модулю связи:
-void SocketCommunication::accept_setting_config(const ConnectionSettings &setting)
+void SocketCommunication::acceptSettingConfig(const ConnectionSettings &setting)
 {
     stopPolling();
     if (socket->state() == QAbstractSocket::ConnectedState) {
         socket->disconnectFromHost();
     }
     if(setting.network.ip_addr.isEmpty() || setting.network.port == 0){
-         emit errorOccurred("Settings update error");
+        emit errorOccurred("Settings update error");
     }
     // Обновление параметров подключения:
     targetAddress.setAddress(setting.network.ip_addr);
@@ -154,13 +154,3 @@ void SocketCommunication::startPolling(){
 void SocketCommunication::stopPolling(){
     QMetaObject::invokeMethod(pollTimer.get(), &QTimer::stop);
 }
-
-
-
-
-
-
-
-
-
-

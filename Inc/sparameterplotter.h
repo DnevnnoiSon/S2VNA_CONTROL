@@ -2,14 +2,15 @@
 #define SPARAMETERPLOTTER_H
 
 #include <QWidget>
-#include <QtCharts>
+#include <QtCharts/QChart>
+#include <QtCharts/QChartView>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QValueAxis>
+
 #include "s2vna_scpi.h"
 
-// Прямые объявления для уменьшения зависимостей в заголовках
-class QChart;
-class QChartView;
-class QLineSeries;
-class QValueAxis;
+// Прямое объявление для QVBoxLayout
+class QVBoxLayout;
 
 /**
  * @brief Виджет для отображения графика S-параметров.
@@ -50,12 +51,18 @@ private:
      */
     void setupAxes();
 
+    /**
+     * @brief Применяет стили к графическим компонентам.
+     */
+    void setupStyle();
+
     // Графические компоненты
     QChart *m_chart;          ///< Основной объект графика.
     QChartView *m_chartView;  ///< Виджет для отображения графика.
     QLineSeries *m_series;    ///< Серия данных для линейного графика.
     QValueAxis *m_axisX;      ///< Ось абсцисс (частота).
     QValueAxis *m_axisY;      ///< Ось ординат (амплитуда в дБ).
+    QVBoxLayout *m_layout;    ///< Менеджер компоновки.
 
     // Вспомогательные данные
     S2VNA_SCPI m_scpiParser;       ///< Объект для парсинга SCPI-ответов.

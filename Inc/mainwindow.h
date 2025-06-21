@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <memory>
+#include "s2vna_scpi.h" // Добавлено для m_scpi
 
 // Прямые объявления для уменьшения зависимостей в заголовках
 namespace Ui {
@@ -10,7 +11,7 @@ class MainWindow;
 }
 class SParameterPlotter;
 class ICommunication;
-struct ConnectionSettings;
+class ConnectionSettings;
 
 /**
  * @brief Главное окно приложения.
@@ -76,6 +77,11 @@ private slots:
 
 private:
     /**
+     * @brief Инициализирует и настраивает компоненты UI.
+     */
+    void InitUI();
+
+    /**
      * @brief Устанавливает все необходимые сигнально-слотовые соединения.
      */
     void setupConnections();
@@ -86,11 +92,9 @@ private:
     void setupUiAppearance();
 
     std::unique_ptr<Ui::MainWindow> ui; ///< Указатель на UI-компоненты, сгенерированные из .ui файла.
-
-    // SParameterPlotter создается и управляется через .ui файл (метод "promote").
-    // Указатель получаем из ui для удобства доступа.
-    SParameterPlotter* m_plotter; ///< Указатель на виджет с графиком.
+    SParameterPlotter* m_plotter;       ///< Указатель на виджет с графиком.
     std::unique_ptr<ICommunication> m_communicator; ///< Указатель на модуль связи.
+    S2VNA_SCPI m_scpi;                  ///< Объект для генерации SCPI-команд.
 };
 
 #endif // MAINWINDOW_H

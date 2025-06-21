@@ -1,16 +1,17 @@
 #include "sparameterplotter.h"
-//=== !Костыльный фронт! ===//
+#include <QVBoxLayout>
+#include <limits> // Добавлено для std::numeric_limits
 
 SParameterPlotter::SParameterPlotter(QWidget *parent)
     : QWidget(parent)
 {
     // Инициализация объектов
-    chart = new QChart();
-    chartView = new QChartView(chart, this);
-    series = new QLineSeries(this);
-    axisX = new QValueAxis();
-    axisY = new QValueAxis();
-    layout = new QVBoxLayout(this);
+    m_chart = new QChart();
+    m_chartView = new QChartView(m_chart, this);
+    m_series = new QLineSeries(this);
+    m_axisX = new QValueAxis();
+    m_axisY = new QValueAxis();
+    m_layout = new QVBoxLayout(this);
 
     // Базовая настройка
     setupChart();
@@ -18,128 +19,117 @@ SParameterPlotter::SParameterPlotter(QWidget *parent)
     setupStyle();
 
     // Добавление элементов в макет
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(chartView);
-    setLayout(layout);
+    m_layout->setContentsMargins(0, 0, 0, 0);
+    m_layout->addWidget(m_chartView);
+    setLayout(m_layout);
 }
 
 void SParameterPlotter::setupChart() {
-    chart->addSeries(series);
-    chart->legend()->hide();
-    chart->setBackgroundBrush(Qt::transparent);
-    chart->setBackgroundRoundness(0);
-    chart->setMargins(QMargins(0, 0, 0, 0));
-    chart->layout()->setContentsMargins(0, 0, 0, 0);
+    m_chart->addSeries(m_series);
+    m_chart->legend()->hide();
+    m_chart->setBackgroundBrush(Qt::transparent);
 }
 
 void SParameterPlotter::setupAxes() {
     // Настройка осей
-    axisX->setTitleText("Частота, Мгц");
-    axisY->setTitleText("S-параметры, дБ");
-    axisX->setLabelFormat("%.2f");
-    axisY->setLabelFormat("%.1f");
+    m_axisX->setTitleText("Частота, МГц");
+    m_axisY->setTitleText("S-параметры, дБ");
+    m_axisX->setLabelFormat("%.2f");
+    m_axisY->setLabelFormat("%.1f");
+    m_axisX->setTickCount(7);
+    m_axisY->setTickCount(5);
+
 
     // Стиль сетки
-    axisX->setGridLineColor(QColor(255, 255, 255, 30));
-    axisY->setGridLineColor(QColor(255, 255, 255, 30));
-    axisX->setLineVisible(false);
-    axisY->setLineVisible(false);
+    QPen gridPen(QColor(255, 255, 255, 30));
+    m_axisX->setGridLinePen(gridPen);
+    m_axisY->setGridLinePen(gridPen);
+    m_axisX->setLineVisible(false);
+    m_axisY->setLineVisible(false);
 
     // Добавление осей к графику
-    chart->addAxis(axisX, Qt::AlignBottom);
-    chart->addAxis(axisY, Qt::AlignLeft);
+    m_chart->addAxis(m_axisX, Qt::AlignBottom);
+    m_chart->addAxis(m_axisY, Qt::AlignLeft);
 
     // Привязка серии к осям
-    series->attachAxis(axisX);
-    series->attachAxis(axisY);
+    m_series->attachAxis(m_axisX);
+    m_series->attachAxis(m_axisY);
 }
 
 void SParameterPlotter::setupStyle() {
-    series->setPen(QPen(QColor("#2c3e50"), 2));
-    series->setPointsVisible(false);
-    chartView->setMinimumSize(300, 250);
-    chartView->setStyleSheet(
-        "background: rgba(30, 30, 30, 200);"
+    m_series->setPen(QPen(QColor("#3498db"), 2)); // Цвет линии изменен на более яркий
+    m_series->setPointsVisible(false);
+
+    // Стиль для фона и рамки
+    m_chartView->setStyleSheet(
+        "background: transparent;"
         "border: 1px solid rgba(255, 255, 255, 100);"
         "border-radius: 8px;"
         );
+    // Стиль самого графика внутри View
+    m_chart->setBackgroundBrush(QColor(35, 35, 35));
 }
 
 void SParameterPlotter::setFrequencyData(const QVector<double>& frequencies) {
-    scpi.Frequency = frequencies;
+    m_frequencies = frequencies;
 }
 
-//========== Установка графика с новыми значениями =========//
-//x — частота (МГц),
-//y — значение S-параметра (дБ).
 void SParameterPlotter::updateChart(const QString &response) {
-    // Парсинг данных - формирование полей 0X/0Y
-    const auto coordinates = scpi.parseResponse(response, scpi.Frequency);
+    const auto coordinates = m_scpiParser.parseResponse(response, m_frequencies);
     if (coordinates.isEmpty()) {
-        qWarning() << "Invalid or empty S-parameters data";
-        series->clear();
+        qWarning() << "Invalid or empty S-parameters data received.";
+        m_series->clear();
         return;
     }
 
-    for(const auto &el : coordinates){
-        qDebug() << "Parsed sParams:" << el; //!проверка парсера
-    }
-
-
-    // Подготовка контейнера для точек
     QVector<QPointF> points;
     points.reserve(coordinates.size());
 
-    // Вычисление границ
     double minX = std::numeric_limits<double>::max();
     double maxX = std::numeric_limits<double>::lowest();
     double minY = std::numeric_limits<double>::max();
     double maxY = std::numeric_limits<double>::lowest();
 
-    // Единый проход для преобразования данных и вычисления min/max
-    for (const auto &[complex, freq] : coordinates) {
+    const double mega = 1e6;
+
+    for (const auto &[complex, freq_hz] : coordinates) {
+        // --- ИСПРАВЛЕНО: Преобразование частоты из Гц в МГц для отображения ---
+        const double freq_mhz = freq_hz / mega;
+
         const double real = complex.first;
         const double imag = complex.second;
 
         // Вычисление амплитуды в дБ
         const double magnitude = std::hypot(real, imag);
-        const double dB = 20 * std::log10(magnitude);
+        const double dB = (magnitude > 0) ? (20 * std::log10(magnitude)) : -std::numeric_limits<double>::infinity();
 
-        // Обновление границ
-        minX = std::min(minX, freq);
-        maxX = std::max(maxX, freq);
-        minY = std::min(minY, dB);
-        maxY = std::max(maxY, dB);
+        // Обновление границ с использованием значений в МГц
+        minX = std::min(minX, freq_mhz);
+        maxX = std::max(maxX, freq_mhz);
+        if (std::isfinite(dB)) {
+            minY = std::min(minY, dB);
+            maxY = std::max(maxY, dB);
+        }
 
-        points.append({freq, dB});
+        points.append({freq_mhz, dB});
     }
 
-// Обновление серии за один вызов
-    series->replace(points);
+    // Обновление серии за один вызов
+    m_series->replace(points);
 
-    // Корректировка границ при одинаковых значениях
+    // Корректировка границ для лучшего вида
     const auto adjustRange = [](double min, double max) -> std::pair<double, double> {
-        if (qFuzzyCompare(min, max)) {
+        if (!std::isfinite(min) || !std::isfinite(max) || qFuzzyCompare(min, max)) {
             return {min - 1.0, max + 1.0};
         }
         const double margin = 0.05 * (max - min);
         return {min - margin, max + margin};
     };
 
-    const auto [xMin, xMax] = adjustRange(minX, maxX);
-    const auto [yMin, yMax] = adjustRange(minY, maxY);
+    auto [finalMinX, finalMaxX] = adjustRange(minX, maxX);
+    auto [finalMinY, finalMaxY] = adjustRange(minY, maxY);
 
     // Установка диапазонов осей
-    axisX->setRange(xMin, xMax);
-    axisY->setRange(yMin, yMax);
-
-    // Настройка форматов
-    axisX->setLabelFormat((maxX - minX < 1.0) ? "%.3f" : "%.1f");
-    axisY->setLabelFormat("%.1f");
-    axisX->setTickCount(5);
-    axisY->setTickCount(5);
+    m_axisX->setRange(finalMinX, finalMaxX);
+    m_axisY->setRange(finalMinY, finalMaxY);
 }
-
-
-
-

@@ -2,7 +2,9 @@
 #define SOCKETCOMMUNICATION_H
 
 #include "icommunication.h"
+
 #include <QTcpSocket>
+#include <QThread>
 #include <QTimer>
 #include <memory>
 
@@ -11,87 +13,84 @@
  * @details Управляет подключением, отправкой/приемом данных и переподключением
  * в случае потери связи с хостом.
  */
-class SocketCommunication : public ICommunication {
+class SocketCommunication : public ICommunication
+{
     Q_OBJECT
 public:
     /**
-     * @brief Конструктор класса.
-     * @param parent Родительский объект QObject.
-     */
+    * @brief Конструктор класса.
+    * @param parent Родительский объект QObject.
+    */
     explicit SocketCommunication(QObject *parent = nullptr);
 
     /**
-     * @brief Деструктор.
-     */
-    ~SocketCommunication() override;
+    * @brief Деструктор - (неактивен).
+    */
+    ~SocketCommunication();
 
     /**
-     * @brief @copydoc ICommunication::sendCommand
-     */
+    * @brief @copydoc ICommunication::sendCommand.
+    * @param Отправляемая команда.
+    * @return Статус отправки 0 - успешно, 1 - socket ошибка.
+    */
     int sendCommand(const QString &command) override;
 
-    /**
-     * @brief @copydoc ICommunication::connectToDevice
-     */
-    void connectToDevice() override;
 
     /**
-     * @brief @copydoc ICommunication::startPolling
-     */
+    * @brief @copydoc ICommunication::connectToDevice
+    */
+    void connectToDevice() override;
+
+
+    /**
+    * @brief @copydoc ICommunication::startPolling
+    */
     void startPolling() override;
 
     /**
-     * @brief @copydoc ICommunication::stopPolling
-     */
+    * @brief @copydoc ICommunication::stopPolling
+    */
     void stopPolling() override;
-
 public slots:
     /**
-     * @brief @copydoc ICommunication::acceptMeasureConfig
-     */
+    * @brief @copydoc ICommunication::acceptMeasureConfig
+    */
     void acceptMeasureConfig(const QString &command) override;
 
     /**
-     * @brief @copydoc ICommunication::acceptSettingConfig
-     */
+    * @brief @copydoc ICommunication::acceptSettingConfig
+    */
     void acceptSettingConfig(const ConnectionSettings &setting) override;
-
 private slots:
     /**
-     * @brief Слот, вызываемый при готовности сокета к чтению данных.
-     */
+    * @brief Слот, вызываемый при готовности сокета к чтению данных.
+    */
     void onReadyRead();
 
     /**
-     * @brief Слот, вызываемый при успешном установлении соединения.
-     */
+    * @brief Слот, вызываемый при успешном установлении соединения.
+    */
     void onConnected();
 
     /**
-     * @brief Слот, вызываемый при разрыве соединения.
-     */
-    void onDisconnected();
-
-    /**
-     * @brief Слот для обработки ошибок сокета.
-     * @param socketError Код ошибки сокета.
-     */
-    void onErrorOccurred(QAbstractSocket::SocketError socketError);
-
-    /**
-     * @brief Выполняет попытку подключения к хосту.
-     */
-    void attemptConnection();
+    * @brief Слот, вызываемый при разрыве соединения.
+    */
+    void onError();
 
 private:
-    ConnectionSettings m_settings; ///< Текущие настройки подключения.
+    int port = 5025; ///< Настройка соединения по умолчанию.
+    QHostAddress targetAddress = QHostAddress::LocalHost; ///< Настройка соединения по умолчанию.
 
-    std::unique_ptr<QTcpSocket> m_socket; ///< Умный указатель на TCP сокет.
-    QByteArray m_responseBuffer;          ///< Буфер для накопления данных из сокета.
+    QByteArray responseBuffer; ///< Буффер для накопления принятых данных.
 
-    std::unique_ptr<QTimer> m_pollTimer; ///< Таймер для периодических попыток переподключения.
+    std::unique_ptr<QTcpSocket> socket; ///< Умный указатель на TCP сокет.
+    std::unique_ptr<QThread> thread;
 
-    bool m_isExpectingIDN = false; ///< Флаг, указывающий на ожидание ответа *IDN?.
+    //Периодический опрос состояния:
+    std::unique_ptr<QTimer> pollTimer; ///< Таймер для периодических попыток переподключения.
+    bool isDeviceReady = false;    ///< Флаг готовности устройства [ сокетное подключение ]
+    bool isExpectingIDN = false;   ///< Флаг, указывающий на ожидание ответа *IDN?.
 };
 
 #endif // SOCKETCOMMUNICATION_H
+

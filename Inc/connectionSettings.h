@@ -19,9 +19,7 @@ class ConnectionSettings {
 public:
     /** @brief Настройки для TCP/IP сокетного взаимодействия. */
     Network network;
-
-    // Здесь можно добавить другие типы настроек, например:
-    // SerialPortSettings serial;
+    // Здесь можно добавить другие типы настроек:
 };
 
 #endif // CONNECTIONSETTINGS_H

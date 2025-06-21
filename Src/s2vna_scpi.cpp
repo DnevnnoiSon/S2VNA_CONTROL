@@ -1,15 +1,11 @@
 #include "s2vna_scpi.h"
-#include <QDebug> // Добавлено для qWarning
+#include <QDebug>
 
-//вх. данные соотв. эксп. нотации: [действительная часть, мнимая часть]
-// sParams - [действительная часть, мнимая часть]
-// Frecuency - [ действительная часть ]
-//вых. данные: Вектор[ sParams , Frecuency ]
 QVector<QPair<QPair<double, double>, double>> S2VNA_SCPI::parseResponse(const QString& response, const QVector<double>& frequency)
 {
     QVector<QPair<QPair<double, double>, double>> coordinates; // Переименовано с 'Сoordinates'
     QStringList parts = response.split(',');
-    //==== !ОСТОРОЖНО! - может сломать эксп. нотацию
+
     for(auto &el : parts){
         // удаление всех '+':
         el.replace("+", "");
@@ -26,10 +22,12 @@ QVector<QPair<QPair<double, double>, double>> S2VNA_SCPI::parseResponse(const QS
         qWarning() << "Invalid response format!";
         return coordinates;
     }
+
+    coordinates.reserve(frequency.size());
+
     auto it_x = frequency.constBegin();
     auto it_y = parts.constBegin();
     while (it_y != parts.constEnd()) {
-        //================ [ [действительная часть, мнимая часть        ],  частота  ] ====//
         coordinates.append({ {(it_y++)->toDouble(), (it_y++)->toDouble()}, *(it_x++) });
     }
     return coordinates;

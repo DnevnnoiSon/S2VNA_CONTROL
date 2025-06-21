@@ -18,7 +18,7 @@ public:
      * @brief Парсит строку ответа с S-параметрами.
      * @param response Строка ответа от устройства, содержащая пары (real, imag).
      * @param frequency Вектор частот, соответствующий полученным S-параметрам.
-     * @return Вектор пар, где каждая пара содержит { {real, imag}, frequency }.
+     * @return Вектор пар, где каждая пара представляет координаты форматом: { {real, imag}, frequency }.
      */
     QVector<QPair<QPair<double, double>, double>> parseResponse(const QString& response, const QVector<double>& frequency);
 

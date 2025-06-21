@@ -1,33 +1,37 @@
 #include "socketcommunication.h"
 #include <QHostAddress>
+#include <QThread>
 
-SocketCommunication::SocketCommunication(QObject *parent): ICommunication(parent),
-    thread(new QThread())
+SocketCommunication::SocketCommunication(QObject *parent): ICommunication(parent)
 {
-    QMetaObject::invokeMethod(thread.get(), [this]() {
-        socket.reset(new QTcpSocket());
-        pollTimer.reset(new QTimer());
 
-        // Настройка соединения - периодический опрос
-        connect(pollTimer.get(), &QTimer::timeout, this, [this]() {
-            socket->connectToHost(targetAddress, port);
-            socket->waitForConnected(500);
-        }, Qt::QueuedConnection);
-
-        connect(socket.get(), &QTcpSocket::connected, this, &SocketCommunication::onConnected);
-        connect(socket.get(), &QTcpSocket::readyRead, this, &SocketCommunication::onReadyRead);
-        connect(socket.get(), QOverload<QAbstractSocket::SocketError>::of(&QTcpSocket::errorOccurred),
-                this, &SocketCommunication::onError);
-
-        startPolling();
-    });
-    thread->start();
 }
 
-SocketCommunication::~SocketCommunication(){
-    thread->quit();
-    if (!thread->wait(100)) {
-        thread->terminate();
+void SocketCommunication::initialize()
+{
+    m_socket = std::make_unique<QTcpSocket>();
+    m_pollTimer = std::make_unique<QTimer>();
+
+    connect(m_pollTimer.get(), &QTimer::timeout, this, &SocketCommunication::attemptConnection);
+
+    connect(m_socket.get(), &QTcpSocket::connected, this, &SocketCommunication::onConnected);
+    connect(m_socket.get(), &QTcpSocket::readyRead, this, &SocketCommunication::onReadyRead);
+    connect(m_socket.get(), &QTcpSocket::errorOccurred, this, &SocketCommunication::onErrorOccurred);
+
+    startPolling();
+}
+
+SocketCommunication::~SocketCommunication() {
+    if (m_socket->state() == QAbstractSocket::UnconnectedState) {
+        m_socket->connectToHost(m_targetAddress, m_port);
+        // Состояние подключения будет обрабатываться в слотах onConnected/onErrorOccurred.
+    }
+}
+
+void SocketCommunication::attemptConnection() {
+    if (m_socket->state() == QAbstractSocket::UnconnectedState) {
+        m_socket->connectToHost(m_targetAddress, m_port);
+        // Состояние подключения обработается в слотах onConnected/onErrorOccurred.
     }
 }
 
@@ -37,24 +41,27 @@ SocketCommunication::~SocketCommunication(){
 int SocketCommunication::sendCommand(const QString &command)
 {
     //Проверка сетевого подключения:
-    if (!socket || socket->state() != QAbstractSocket::ConnectedState){
-        emit errorOccurred("Device is not connected");
+    if (!m_socket || m_socket->state() != QAbstractSocket::ConnectedState){
+        emit errorOccurred("Устройство не подключено");
         return 1;
     }
-    qDebug() << "Sending command: " << command;
-    //Отправка команды --> S2VNA
-    QByteArray scpi_cmd = command.toUtf8();
+    qDebug() << "Отправка команды:" << command;
+    const QByteArray scpi_cmd = command.toUtf8();
 
-    auto result = socket->write(scpi_cmd);
-    if (result == -1 || !socket->waitForBytesWritten(1000)){
-        emit errorOccurred("Failed to send command");
+    if (m_socket->write(scpi_cmd) == -1) {
+        emit errorOccurred("Ошибка записи в сокет");
+        return 1;
+    }
+
+    if (!m_socket->waitForBytesWritten(WRITE_TIMEOUT_MS)){
+        emit errorOccurred("Не удалось отправить команду [тайм-аут]");
         return 1;
     }
     return 0;
 }
 
 void SocketCommunication::connectToDevice(){
-    // Здесь будут разовые действия при самом начале подключения:
+// Момент первичного успешного подключения.
     sendCommand("*RST\n");
 }
 
@@ -62,95 +69,95 @@ void SocketCommunication::connectToDevice(){
 void SocketCommunication::onConnected(){   /* успешное подключение */
     stopPolling();
     isExpectingIDN = true;
-    //Отправка команды идиентификации:
+    // Отправка команды идиентификации:
     sendCommand("*IDN?\n");
-
     emit deviceStatusChanged(true);
 }
 
 //==================================================================//
 //                      ПРИНЯТИЕ ДАННЫХ                             //
 //==================================================================//
-void SocketCommunication::onReadyRead(){     /* Готовность чтения[прием данных] */
+void SocketCommunication::onReadyRead() {     /* Готовность чтения[прием данных] */
     QString response;
-    responseBuffer += socket->readAll();
-    qDebug() << "Response: " << responseBuffer;
+    m_responseBuffer += m_socket->readAll();
     // Проверка на завершенность ответа - [\n]
-    if (responseBuffer.endsWith('\n'))
+    while (m_responseBuffer.contains('\n'))
     {
-        response = QString::fromUtf8(responseBuffer);
-        if(isExpectingIDN ){ //Флаг ожидание IDN активен?
+        int newline_pos = m_responseBuffer.indexOf('\n');
+        QByteArray messageData = m_responseBuffer.left(newline_pos);
+        // Удаление сообщения и символа '\n':
+        m_responseBuffer.remove(0, newline_pos + 1);
+
+        QString response = QString::fromUtf8(messageData);
+        qDebug() << "Получен полный ответ:" << response;
+
+        if (isExpectingIDN) {
             isExpectingIDN = false;
             emit idnReceived(response);
         }
-        else{ // Пришли зависимости S-параметров:
-            if(!response.isEmpty()) {
-                emit sParamsReceived(response);
-            }
+        else if (!response.isEmpty()) {
+            emit sParamsReceived(response);
         }
-        responseBuffer.clear();
     }
-    else{
-        //сообщение неоконченно, требуется внутреннее кэширование:
-
-        //а может и просто ошибка:
-        emit errorOccurred("Incorrect response data");
-    }
+/// p.s. если неоконченное '\n' требуется кэширование а может и просто ошибка:
 }
 
-void SocketCommunication::onError(){ /* Ошибка подключения */
-    isDeviceReady = false;
-    emit errorOccurred(socket->errorString());
+void SocketCommunication::onErrorOccurred(QAbstractSocket::SocketError socketError) {
+    Q_UNUSED(socketError);
+    emit errorOccurred(m_socket->errorString());
     emit deviceStatusChanged(false);
+    startPolling(); // Попытка переподключится
 }
 
-//Отправка валидных UI данных:
-void SocketCommunication::acceptMeasureConfig(const QString &command)
-{   /* Вх. данные - упакованная scpi команда */
+void SocketCommunication::acceptMeasureConfig(const QString &command) {
     if (command.isEmpty()) {
-        emit errorOccurred("communication data error");
+        emit errorOccurred("Ошибка: данные отстутствуют ");
         return;
     }
-    qDebug() << "Parsing string: " << command;
-    //Парсинг на части -> отправка
-    const auto multiple_parts = command.split(';');
-    for (const auto &part : multiple_parts){
-        sendCommand(part);
+    qDebug() << "Строка которая будет парсится: " << command;
+
+    for (const auto &part : command.split(';')) {
+        if (!part.trimmed().isEmpty()) {
+            sendCommand(part);
+        }
     }
-    /*.trimmed() - !не рекомендуется использовать! */
-    /* портит scpi */
+/// trimmed() - не использовать, опасно для используемого формата команд
 }
 
 //Отправка валидных UI настроек модулю связи:
-void SocketCommunication::acceptSettingConfig(const ConnectionSettings &setting)
-{
+void SocketCommunication::acceptSettingConfig(const ConnectionSettings &setting) {
     stopPolling();
-    if (socket->state() == QAbstractSocket::ConnectedState) {
-        socket->disconnectFromHost();
+    if (m_socket->state() == QAbstractSocket::ConnectedState) {
+        m_socket->disconnectFromHost();
+        if (m_socket->state() != QAbstractSocket::UnconnectedState) {
+            m_socket->waitForDisconnected(1000);
+        }
     }
     if(setting.network.ip_addr.isEmpty() || setting.network.port == 0){
-        emit errorOccurred("Settings update error");
+        emit errorOccurred("Ошибка обновления настроек подключения");
     }
     // Обновление параметров подключения:
-    targetAddress.setAddress(setting.network.ip_addr);
-    port = setting.network.port;
-
-    if (targetAddress.isNull()) {
-        emit errorOccurred("Error IP address update");
+    m_targetAddress.setAddress(setting.network.ip_addr);
+    if (m_targetAddress.isNull()) {
+        emit errorOccurred("Ошибка: неверный формат IP адреса");
         return;
     }
+    m_port = setting.network.port;
+
     startPolling();
 }
 
 //==================================================================//
 //                  ОПРОС ТАЙМЕРА О СОСТОЯНИИ ХОСТА                 //
 //==================================================================//
-void SocketCommunication::startPolling(){
-    QMetaObject::invokeMethod(pollTimer.get(), [this]() {
-        pollTimer->start(500); // Опрос каждую секунду
-    }, Qt::QueuedConnection);
+void SocketCommunication::startPolling() {
+    if (m_pollTimer && !m_pollTimer->isActive()) {
+        m_pollTimer->start(POLLING_INTERVAL_MS);
+    }
 }
 
-void SocketCommunication::stopPolling(){
-    QMetaObject::invokeMethod(pollTimer.get(), &QTimer::stop);
+void SocketCommunication::stopPolling() {
+    if (m_pollTimer) {
+        m_pollTimer->stop();
+    }
 }

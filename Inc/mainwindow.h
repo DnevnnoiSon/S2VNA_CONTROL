@@ -5,10 +5,12 @@
 #include <memory>
 #include "s2vna_scpi.h" // Добавлено для m_scpi
 
-// Прямые объявления для уменьшения зависимостей в заголовках
 namespace Ui {
 class MainWindow;
 }
+
+class QThread;
+
 class SParameterPlotter;
 class ICommunication;
 class ConnectionSettings;
@@ -91,10 +93,13 @@ private:
      */
     void setupUiAppearance();
 
-    std::unique_ptr<Ui::MainWindow> ui; ///< Указатель на UI-компоненты, сгенерированные из .ui файла.
-    SParameterPlotter* m_plotter;       ///< Указатель на виджет с графиком.
-    std::unique_ptr<ICommunication> m_communicator; ///< Указатель на модуль связи.
-    S2VNA_SCPI m_scpi;                  ///< Объект для генерации SCPI-команд.
+    std::unique_ptr<Ui::MainWindow> ui;  ///< Указатель на UI-компоненты, сгенерированные из .ui файла.
+    SParameterPlotter* m_plotter;        ///< Указатель на виджет с графиком.
+    std::unique_ptr<ICommunication> m_communicator;  ///< Указатель на модуль связи.
+    QThread* m_commThread;               ///< Поток, в котором будет работать модуль связи.
+    S2VNA_SCPI m_scpi;                   ///< Объект для генерации SCPI-команд.
+
+
 };
 
 #endif // MAINWINDOW_H

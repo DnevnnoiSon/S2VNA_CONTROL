@@ -6,22 +6,52 @@
 #include "sparameterplotter.h"
 #include "s2vna_scpi.h"
 
-#define MAX_POWER 60
+#include <QThread>
+#include <QVector>
+#include <numeric>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+static constexpr int MAX_POWER = 60;
+static constexpr double MEGAHERTZ_MULTIPLIER = 1e6;
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    m_commThread(new QThread(this))
 {
     ui->setupUi(this);
 
-    InitUI();           // Создание виджетов
-    setupUiAppearance(); // Стилизация (переименовано для соответствия .h)
-    setupConnections(); // Сигналы/слоты
+    this->setWindowTitle("S2VNA CONTROL");
+
+    InitUI();            // Создание виджетов
+    setupUiAppearance(); // Стилизация
+    setupConnections();  // Сигналы/слоты
+
+    // Запуск дочернего потока - поток связи
+    m_commThread->start();
+    // Вызов внутри дочернего потока
+
+    QMetaObject::invokeMethod(static_cast<SocketCommunication*>(m_communicator.get()),
+    &SocketCommunication::initialize);
+/// [ Под указателем на интерфейс ICommunication -> объект класса SocketCommunication ]
+}
+
+MainWindow::~MainWindow(){
+    // Завершение дочернего потока:
+    m_commThread->quit();
+    if (!m_commThread->wait(3000)) {
+        m_commThread->terminate();
+        m_commThread->wait();
+    }
 }
 
 //================ Создание виджетов ===============//
-void MainWindow::InitUI(){
-    // Подключение к хосту --> авто-пробуждение S2VNA потока
-    m_communicator.reset(new SocketCommunication(this));
-    //График ВАЦ [полученные с S2VNA параметры]
+void MainWindow::InitUI()
+{
+    auto communicator = std::make_unique<SocketCommunication>();
+
+    m_communicator.reset(communicator.release());
+    m_communicator->moveToThread(m_commThread);
+
     m_plotter = new SParameterPlotter(this);
     ui->frame_6->setLayout(new QVBoxLayout());
     ui->frame_6->layout()->addWidget(m_plotter);
@@ -31,7 +61,7 @@ void MainWindow::InitUI(){
 //========================Установка стилей ==========================//
 void MainWindow::setupUiAppearance()
 {
-    //фрейм над графико:
+    //фрейм над графиком:
     ui->frame_5->setStyleSheet
         ("background-color: rgb(35,35,35);"
          "border: 1px solid rgba(255, 255, 255, 100);"
@@ -59,7 +89,12 @@ void MainWindow::setupUiAppearance()
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::setupConnections(){
     // Нажатие Измерить --> Валидация даннных конфигурации ВАЦ
+    connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
     // Нажатие Обновить --> Валидация настроек сетевого подключения
+    connect(ui->updateButton,&QPushButton::clicked, this, &MainWindow::on_updateButton_clicked);
+
+    // Завершения потока --> удаление объекта связи
+    connect(m_commThread, &QThread::finished, m_communicator.get(), &QObject::deleteLater);
 
     // Изменение статуса хоста --> Кнопка измерить в зеленный цвет
     connect(m_communicator.get(), &ICommunication::deviceStatusChanged,
@@ -86,52 +121,51 @@ void MainWindow::setupConnections(){
             m_plotter, &SParameterPlotter::updateChart, Qt::QueuedConnection);
 }
 
-MainWindow::~MainWindow(){
-
-}
-
 void MainWindow::on_measureButton_clicked()
 {
-    if( (ui->startSpinBox->value() >= ui->endSpinBox->value()) ||
-        (ui->powerSpinBox->value() > MAX_POWER) )
-    {
-        handleDeviceError("Incorrect valid parameters");
+    const auto [startFreq, endFreq, points, power] = std::make_tuple(
+        ui->startSpinBox->value(),
+        ui->endSpinBox->value(),
+        ui->pointspinBox->value(),
+        ui->powerSpinBox->value()
+        );
+
+    if (startFreq >= endFreq || power > MAX_POWER || points <= 1) {
+        handleDeviceError("Некорректные параметры измерения");
         return;
     }
-    if(ui->pointspinBox->value() <= 1){
-        handleDeviceError("Incorrect valid parameters");
-        return;
-    }
-    double coeficent = 1e6; // Мега => 1 лям:
-    //Ввалидные данные:
+
+    // Ввалидные данные:
     QList<QPair<QString, QVariant>> config {
-        //СОГЛАШЕНИЕ МОЕГО CONFIG КОНТЕЙНЕРА: если параметра нет - 0;
-        {"SENSe:FREQuency:STARt", (ui->startSpinBox->value() * coeficent) },  // Начальная частота
-        {"SENSe:FREQuency:STOP",  (ui->endSpinBox->value() * coeficent) },  // Конечная частота
-        {"SENSe:SWEep:POINts", ui->pointspinBox->value() },     // Кол-во точек
-        {"SOURce:POWer",          ui->powerSpinBox->value()},  // Мощность
-        {"CALCulate:DATA:SDATa?", 0},  //Запрос на считывания -> [SS,частоты]..
+        /// Соглашение CONFIG контейнера для удобства:
+        /// если параметра нет - 0;
+        {"SENSe:FREQuency:STARt", startFreq * MEGAHERTZ_MULTIPLIER },
+        {"SENSe:FREQuency:STOP",  endFreq * MEGAHERTZ_MULTIPLIER },
+        {"SENSe:SWEep:POINts",    points },
+        {"SOURce:POWer",          power},
+        {"CALCulate:DATA:SDATa?", 0},  // Запрос на считывания -> [SS,частоты]..
     };
 
     //Передача в сокетный поток для отправки:
     QString command = m_scpi.generateCommand(config); //= конвертация
     //Формирование шага частоты, заполнение шагом
-    QVector<double> frequencies;
-    frequencies.reserve(ui->pointspinBox->value());
+    QVector<double> frequencies(points);
 
-    double frequency_step = (( ui->endSpinBox->value() - ui->startSpinBox->value() ) * coeficent) / (ui->pointspinBox->value() - 1);
-    double frequency_el = (ui->startSpinBox->value() * coeficent);
+    const double startFreqHz = startFreq * MEGAHERTZ_MULTIPLIER;
+    const double endFreqHz = endFreq * MEGAHERTZ_MULTIPLIER;
+    const double freqStep = (points > 1) ? (endFreqHz - startFreqHz) / (points - 1) : 0;
 
-    for(int index = 0; index < ui->pointspinBox->value(); index++){
-        frequencies.append(frequency_el);
-        frequency_el += frequency_step;
+    // равномерное распределение в диапозоне:
+    std::iota(frequencies.begin(), frequencies.end(), 0);
+    for (double& freq : frequencies) {
+        freq = startFreqHz + freq * freqStep;
     }
 
-    qWarning() << "Frequency points: " << frequencies.size();
-    // Передача частоты для последующей отрисовки на графике
+    qWarning() << "Количество точек частоты: " << frequencies.size();
+    // Передача команд для построения графика:
     m_plotter->setFrequencyData(frequencies);
 
-    // Передача команд для последующей отправки
+    // Передача сырой последовательности команд scpi билдеру
     emit measureConfigTransferred(command);
 }
 
@@ -159,7 +193,7 @@ void MainWindow::onDeviceStatusChanged(bool isReady){
 }
 
 void MainWindow::handleDeviceError(const QString& errorMessage){
-    statusBar()->showMessage("Status: " + errorMessage, 600);
+    statusBar()->showMessage("Статус: " + errorMessage, 1000);
 }
 
 void MainWindow::handleIdnResponse(const QString &idnInfo) {
@@ -170,7 +204,7 @@ void MainWindow::handleIdnResponse(const QString &idnInfo) {
         ui->modelLabel->setText(parts[1].trimmed());
         ui->vendorLabel->setText( parts[0].trimmed());
     } else {
-        ui->modelLabel->setText("Unknown device");
-        ui->vendorLabel->setText("Unknown vendor");
+        ui->modelLabel->setText("Неизвестно");
+        ui->vendorLabel->setText("Неизвестно");
     }
 }

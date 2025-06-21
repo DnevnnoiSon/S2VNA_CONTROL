@@ -12,14 +12,14 @@ QVector<QPair<QPair<double, double>, double>> S2VNA_SCPI::parseResponse(const QS
     }
 
     if( (parts.size() / 2) != frequency.size() ){
-        qWarning() << "Frequency size is " << frequency.size();
-        qWarning() << "Sparams size is " << parts.size() / 2;
+        qWarning() << "Количество точек частоты: " << frequency.size();
+        qWarning() << "Количество точек S параметров: " << parts.size() / 2;
         return coordinates;
     }
 
     // Проверка четности количества параметров:
     if (parts.size() % 2 != 0 ) {
-        qWarning() << "Invalid response format!";
+        qWarning() << "Неверный формат ответа!";
         return coordinates;
     }
 

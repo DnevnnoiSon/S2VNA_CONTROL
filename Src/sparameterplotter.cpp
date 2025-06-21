@@ -81,7 +81,7 @@ void SParameterPlotter::updateChart(const QString &response)
 {
     const auto coordinates = m_scpiParser.parseResponse(response, m_frequencies);
     if (coordinates.isEmpty()) {
-        qWarning() << "Invalid or empty S-parameters data received.";
+        qWarning() << "C SCPI парсера получены пустые данные S параметров";
         m_series->clear();
         return;
     }
@@ -106,10 +106,10 @@ void SParameterPlotter::updateChart(const QString &response)
         const double dB = (magnitude > 0) ? (20 * std::log10(magnitude)) : -std::numeric_limits<double>::infinity();
 
         //====== Корректность построения ======//
-        qDebug() << "Freq (MHz):" << freq_mhz
-        << "| Real:" << sparams.first
-        << "| Imag:" << sparams.second
-        << "| dB:" << dB;
+        qDebug() << "Точка частоты (МГц): " << freq_mhz
+        << "| Действителная часть S параметра: " << sparams.first
+        << "| Мнимая часть S параметра: " << sparams.second
+        << "| дБ:" << dB;
 
         points.append({freq_mhz, dB});
 

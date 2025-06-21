@@ -29,7 +29,7 @@ public:
     /**
     * @brief Деструктор - (неактивен).
     */
-    ~SocketCommunication();
+    ~SocketCommunication() override = default;
 
     /**
     * @brief @copydoc ICommunication::sendCommand.
@@ -98,8 +98,8 @@ private slots:
 private:
 /// Константы соединения:
     static constexpr int DEFAULT_PORT = 5025;
-    static constexpr int CONNECTION_TIMEOUT_MS = 500;
-    static constexpr int POLLING_INTERVAL_MS = 500;
+    static constexpr int CONNECTION_TIMEOUT_MS = 200;
+    static constexpr int POLLING_INTERVAL_MS = 200;
     static constexpr int WRITE_TIMEOUT_MS = 1000;
 
     QHostAddress m_targetAddress = QHostAddress::LocalHost; ///< Настройка соединения по умолчанию.

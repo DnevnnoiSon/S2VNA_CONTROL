@@ -59,39 +59,14 @@ void MainWindow::InitUI()
 }
 
 //========================Установка стилей ==========================//
-void MainWindow::setupUiAppearance()
-{
-    //фрейм над графиком:
-    ui->frame_5->setStyleSheet
-        ("background-color: rgb(35,35,35);"
-         "border: 1px solid rgba(255, 255, 255, 100);"
-         "border-radius: 8px;");               //метка планара:
-    ui->planarButton->setStyleSheet("border: 2px solid transparent;");
-
-    //Метки:
-    ui->modelLabel->setStyleSheet("color: green; font-weight: bold;");
-    ui->vendorLabel->setStyleSheet("color: green; font-weight: bold;");
-    ui->modelLabel->clear();
-    ui->vendorLabel->clear();
-
-    // Кнопки:
-    ui->settingButton->setFlat(true);
-    ui->settingButton->setStyleSheet("background: transparent; border: none;");
-
-    // Cетевые настройки по умолчанию:
-    ui->ipLineEdit->setText("127.0.0.1");
-    ui->portSpinBox->setValue(5025);
-
-    //Кастомизация:
-    ui->portSpinBox->setButtonSymbols(QAbstractSpinBox::NoButtons);
-}
+void MainWindow::setupUiAppearance(){}
 
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::setupConnections(){
     // Нажатие Измерить --> Валидация даннных конфигурации ВАЦ
-    connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
+    //connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
     // Нажатие Обновить --> Валидация настроек сетевого подключения
-    connect(ui->updateButton,&QPushButton::clicked, this, &MainWindow::on_updateButton_clicked);
+    //connect(ui->updateButton,&QPushButton::clicked, this, &MainWindow::on_updateButton_clicked);
 
     // Завершения потока --> удаление объекта связи
     connect(m_commThread, &QThread::finished, m_communicator.get(), &QObject::deleteLater);

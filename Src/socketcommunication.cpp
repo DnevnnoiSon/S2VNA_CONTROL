@@ -21,13 +21,6 @@ void SocketCommunication::initialize()
     startPolling();
 }
 
-SocketCommunication::~SocketCommunication() {
-    if (m_socket->state() == QAbstractSocket::UnconnectedState) {
-        m_socket->connectToHost(m_targetAddress, m_port);
-        // Состояние подключения будет обрабатываться в слотах onConnected/onErrorOccurred.
-    }
-}
-
 void SocketCommunication::attemptConnection() {
     if (m_socket->state() == QAbstractSocket::UnconnectedState) {
         m_socket->connectToHost(m_targetAddress, m_port);
@@ -61,7 +54,7 @@ int SocketCommunication::sendCommand(const QString &command)
 }
 
 void SocketCommunication::connectToDevice(){
-// Момент первичного успешного подключения.
+    // Момент первичного успешного подключения.
     sendCommand("*RST\n");
 }
 
@@ -69,6 +62,8 @@ void SocketCommunication::connectToDevice(){
 void SocketCommunication::onConnected(){   /* успешное подключение */
     stopPolling();
     isExpectingIDN = true;
+    qDebug() << "Успешное сокет соединение";
+
     // Отправка команды идиентификации:
     sendCommand("*IDN?\n");
     emit deviceStatusChanged(true);
@@ -99,7 +94,7 @@ void SocketCommunication::onReadyRead() {     /* Готовность чтени
             emit sParamsReceived(response);
         }
     }
-/// p.s. если неоконченное '\n' требуется кэширование а может и просто ошибка:
+    /// p.s. если неоконченное '\n' требуется кэширование а может и просто ошибка:
 }
 
 void SocketCommunication::onErrorOccurred(QAbstractSocket::SocketError socketError) {
@@ -121,27 +116,25 @@ void SocketCommunication::acceptMeasureConfig(const QString &command) {
             sendCommand(part);
         }
     }
-/// trimmed() - не использовать, опасно для используемого формата команд
+    /// trimmed() - не использовать, опасно для используемого формата команд
 }
 
 //Отправка валидных UI настроек модулю связи:
 void SocketCommunication::acceptSettingConfig(const ConnectionSettings &setting) {
     stopPolling();
-    if (m_socket->state() == QAbstractSocket::ConnectedState) {
-        m_socket->disconnectFromHost();
-        if (m_socket->state() != QAbstractSocket::UnconnectedState) {
-            m_socket->waitForDisconnected(1000);
-        }
+
+    if (m_socket->state() != QAbstractSocket::UnconnectedState) {
+     /// --- ОСОБЕННОСТЬ ВНУТРЕННЕЙ РЕАЛИЗАЦИИ SOCKET ---
+        m_socket->abort(); // Используем abort() вместо disconnectFromHost()
     }
-    if(setting.network.ip_addr.isEmpty() || setting.network.port == 0){
-        emit errorOccurred("Ошибка обновления настроек подключения");
-    }
-    // Обновление параметров подключения:
-    m_targetAddress.setAddress(setting.network.ip_addr);
-    if (m_targetAddress.isNull()) {
-        emit errorOccurred("Ошибка: неверный формат IP адреса");
+
+    if (setting.network.ip_addr.isEmpty() || setting.network.port == 0) {
+        // ... (обработка ошибки) ...
         return;
     }
+
+    QHostAddress newAddress(setting.network.ip_addr);
+    m_targetAddress = newAddress;
     m_port = setting.network.port;
 
     startPolling();

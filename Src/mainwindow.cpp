@@ -115,9 +115,9 @@ void MainWindow::on_measureButton_clicked()
         /// Соглашение CONFIG контейнера для удобства:
         /// если параметра нет - 0;
         {"SENSe:SWEep:POINts",    points },
+        {"SOURce:POWer",          power},
         {"SENSe:FREQuency:STARt", startFreq * MEGAHERTZ_MULTIPLIER },
         {"SENSe:FREQuency:STOP",  endFreq * MEGAHERTZ_MULTIPLIER },
-        {"SOURce:POWer",          power},
         {"CALCulate:DATA:SDATa?", 0},  // Запрос на считывания -> [SS,частоты]..
     };
 

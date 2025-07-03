@@ -1,6 +1,7 @@
 #include "socketcommunication.h"
 #include <QHostAddress>
 #include <QThread>
+#include <QEventLoop>
 
 SocketCommunication::SocketCommunication(QObject *parent): ICommunication(parent)
 {
@@ -28,9 +29,6 @@ void SocketCommunication::attemptConnection() {
     }
 }
 
-//==================================================================//
-//                  ОТПРАВКА КОМАНД [SCPI] --> S2VNA                //
-//==================================================================//
 int SocketCommunication::sendCommand(const QString &command)
 {
     //Проверка сетевого подключения:
@@ -40,6 +38,7 @@ int SocketCommunication::sendCommand(const QString &command)
     }
     qDebug() << "Отправка команды:" << command;
     const QByteArray scpi_cmd = command.toUtf8();
+
 
     if (m_socket->write(scpi_cmd) == -1) {
         emit errorOccurred("Ошибка записи в сокет");
@@ -58,7 +57,6 @@ void SocketCommunication::connectToDevice(){
     sendCommand("*RST\n");
 }
 
-//========================== СОКЕТНЫЕ ОБРАБОТЧИКИ ===========================//
 void SocketCommunication::onConnected(){   /* успешное подключение */
     stopPolling();
     isExpectingIDN = true;
@@ -69,9 +67,6 @@ void SocketCommunication::onConnected(){   /* успешное подключе�
     emit deviceStatusChanged(true);
 }
 
-//==================================================================//
-//                      ПРИНЯТИЕ ДАННЫХ                             //
-//==================================================================//
 void SocketCommunication::onReadyRead() {     /* Готовность чтения[прием данных] */
     QString response;
     m_responseBuffer += m_socket->readAll();
@@ -94,7 +89,7 @@ void SocketCommunication::onReadyRead() {     /* Готовность чтени
             emit sParamsReceived(response);
         }
     }
-    /// p.s. если неоконченное '\n' требуется кэширование а может и просто ошибка:
+    /// p.s. если неоконченное '\n' требуется кэширование, а может и просто ошибка:
 }
 
 void SocketCommunication::onErrorOccurred(QAbstractSocket::SocketError socketError) {
@@ -111,11 +106,15 @@ void SocketCommunication::acceptMeasureConfig(const QString &command) {
     }
     qDebug() << "Строка которая будет парсится: " << command;
 
-    for (const auto &part : command.split(';')) {
-        if (!part.trimmed().isEmpty()) {
-            sendCommand(part);
-        }
-    }
+    QStringList parts = command.split(';');
+
+    std::for_each(parts.begin(), parts.end() - 1, [this](const QString &part) {
+        sendCommand(part);
+    });
+
+    QTimer::singleShot(350, this, [this, parts]() {  ///< Отказоустойчивость задержки на 1000 точек:
+        sendCommand(parts.last());
+    });
     /// trimmed() - не использовать, опасно для используемого формата команд
 }
 
@@ -140,9 +139,7 @@ void SocketCommunication::acceptSettingConfig(const ConnectionSettings &setting)
     startPolling();
 }
 
-//==================================================================//
-//                  ОПРОС ТАЙМЕРА О СОСТОЯНИИ ХОСТА                 //
-//==================================================================//
+
 void SocketCommunication::startPolling() {
     if (m_pollTimer && !m_pollTimer->isActive()) {
         m_pollTimer->start(POLLING_INTERVAL_MS);

@@ -159,8 +159,6 @@ void MainWindow::onDeviceStatusChanged(bool isReady){
     ui->measureButton->setStyleSheet(style);
     // Доступность кнопки:
     ui->measureButton->setEnabled(isReady);
-    ui->loadButton->setEnabled(isReady);
-    ui->saveButton->setEnabled(isReady);
     if(!isReady){
         ui->modelLabel->clear();
         ui->vendorLabel->clear();

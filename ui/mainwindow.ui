@@ -13,7 +13,7 @@
   <property name="minimumSize">
    <size>
     <width>954</width>
-    <height>481</height>
+    <height>545</height>
    </size>
   </property>
   <property name="mouseTracking">
@@ -581,6 +581,7 @@ border-radius: 8px;</string>
                <property name="font">
                 <font>
                  <pointsize>14</pointsize>
+                 <bold>false</bold>
                 </font>
                </property>
                <property name="cursor">

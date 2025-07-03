@@ -114,9 +114,9 @@ void MainWindow::on_measureButton_clicked()
     QList<QPair<QString, QVariant>> config {
         /// Соглашение CONFIG контейнера для удобства:
         /// если параметра нет - 0;
+        {"SENSe:SWEep:POINts",    points },
         {"SENSe:FREQuency:STARt", startFreq * MEGAHERTZ_MULTIPLIER },
         {"SENSe:FREQuency:STOP",  endFreq * MEGAHERTZ_MULTIPLIER },
-        {"SENSe:SWEep:POINts",    points },
         {"SOURce:POWer",          power},
         {"CALCulate:DATA:SDATa?", 0},  // Запрос на считывания -> [SS,частоты]..
     };

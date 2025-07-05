@@ -1,4 +1,4 @@
-#ifndef S2VNA_SCPI_H
+    #ifndef S2VNA_SCPI_H
 #define S2VNA_SCPI_H
 
 #include <QVariant>

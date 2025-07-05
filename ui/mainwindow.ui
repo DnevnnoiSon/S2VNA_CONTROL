@@ -194,38 +194,6 @@
              <property name="rightMargin">
               <number>0</number>
              </property>
-             <item row="1" column="0">
-              <widget class="QDoubleSpinBox" name="startSpinBox">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="maximum">
-                <double>50000.000000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0" colspan="2">
-              <widget class="Line" name="line_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>400</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="1">
               <widget class="QSpinBox" name="pointspinBox">
                <property name="minimumSize">
@@ -252,6 +220,25 @@
                </property>
                <property name="maximum">
                 <double>200.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="2">
+              <widget class="Line" name="line_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>400</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
@@ -291,6 +278,19 @@
                </property>
               </widget>
              </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="endSpinBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="maximum">
+                <double>500000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_3">
                <property name="font">
@@ -303,8 +303,8 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="endSpinBox">
+             <item row="1" column="0">
+              <widget class="QDoubleSpinBox" name="startSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -312,7 +312,7 @@
                 </size>
                </property>
                <property name="maximum">
-                <double>500000.000000000000000</double>
+                <double>50000.000000000000000</double>
                </property>
               </widget>
              </item>
@@ -353,19 +353,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QTableWidget" name="tableWidget">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">background-color: rgb(35,35,35);
-border: 1px solid rgba(255, 255, 255, 100);
-border-radius: 8px;</string>
-            </property>
-           </widget>
+           <widget class="QListView" name="listView"/>
           </item>
          </layout>
         </widget>

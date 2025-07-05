@@ -6,6 +6,7 @@ CONFIG += c++17
 INCLUDEPATH += Inc
 
 SOURCES += \
+   Src/filecache.cpp \
    Src/main.cpp \
    Src/mainwindow.cpp \
    Src/s2vna_scpi.cpp \
@@ -14,11 +15,13 @@ SOURCES += \
 
 HEADERS += \
    Inc/connectionSettings.h \
+   Inc/filecache.h \
    Inc/icommunication.h \
    Inc/mainwindow.h \
    Inc/s2vna_scpi.h \
    Inc/socketcommunication.h \
-   Inc/sparameterplotter.h
+   Inc/sparameterplotter.h \
+   Src/filecache.h
 
 FORMS += \
     ui/mainwindow.ui

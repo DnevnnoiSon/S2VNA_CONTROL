@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "socketcommunication.h"
+#include "filecache.h"
 #include "connectionSettings.h"
 #include "sparameterplotter.h"
 #include "s2vna_scpi.h"
@@ -16,7 +17,9 @@ static constexpr double MEGAHERTZ_MULTIPLIER = 1e6;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_commThread(new QThread(this))
+    m_commThread(new QThread(this)),
+    m_cacheThread(new QThread(this)),
+    m_cacheModel(new QStandardItemModel(this))
 {
     ui->setupUi(this);
 
@@ -26,17 +29,30 @@ MainWindow::MainWindow(QWidget *parent) :
     setupUiAppearance(); // Стилизация
     setupConnections();  // Сигналы/слоты
 
+    // Запуск дочернего потока - поток кэширования [файловое управление кэшем]
+    m_cacheThread->start();
+    // Вызов внутри дочернего потока
+    QMetaObject::invokeMethod(m_fileCache.get(),
+    &FileCache::getCacheFromResources, Qt::QueuedConnection);
+
     // Запуск дочернего потока - поток связи
     m_commThread->start();
     // Вызов внутри дочернего потока
-
     QMetaObject::invokeMethod(static_cast<SocketCommunication*>(m_communicator.get()),
     &SocketCommunication::initialize);
+
 /// [ Под указателем на интерфейс ICommunication -> объект класса SocketCommunication ]
 }
 
 MainWindow::~MainWindow(){
-    // Завершение дочернего потока:
+
+// Завершение дочерних потоков:
+    m_cacheThread->quit();
+    if (!m_cacheThread->wait(3000)) {
+        m_cacheThread->terminate();
+        m_cacheThread->wait();
+    }
+
     m_commThread->quit();
     if (!m_commThread->wait(3000)) {
         m_commThread->terminate();
@@ -47,10 +63,11 @@ MainWindow::~MainWindow(){
 //================ Создание виджетов ===============//
 void MainWindow::InitUI()
 {
-    auto communicator = std::make_unique<SocketCommunication>();
-
-    m_communicator.reset(communicator.release());
+    m_communicator = std::make_unique<SocketCommunication>();
     m_communicator->moveToThread(m_commThread);
+
+    m_fileCache = std::make_unique<FileCache>();
+    m_fileCache->moveToThread(m_cacheThread);
 
     m_plotter = new SParameterPlotter(this);
     ui->frame_6->setLayout(new QVBoxLayout());
@@ -63,11 +80,6 @@ void MainWindow::setupUiAppearance(){}
 
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::setupConnections(){
-    // Нажатие Измерить --> Валидация даннных конфигурации ВАЦ
-    //connect(ui->measureButton, &QPushButton::clicked, this, &MainWindow::on_measureButton_clicked);
-    // Нажатие Обновить --> Валидация настроек сетевого подключения
-    //connect(ui->updateButton,&QPushButton::clicked, this, &MainWindow::on_updateButton_clicked);
-
     // Завершения потока --> удаление объекта связи
     connect(m_commThread, &QThread::finished, m_communicator.get(), &QObject::deleteLater);
 
@@ -91,9 +103,17 @@ void MainWindow::setupConnections(){
     connect(m_communicator.get(), &ICommunication::idnReceived,
             this, &MainWindow::handleIdnResponse, Qt::QueuedConnection);
 
-    // Пришли данные sParams --> Вывод в график
+    // Пришли сырые данные sParams --> Вывод в график
     connect(m_communicator.get(), &ICommunication::sParamsReceived,
             m_plotter, &SParameterPlotter::updateChart, Qt::QueuedConnection);
+
+    // Данные были сформированы --> Занести в кэш перед построением
+    connect(m_plotter, &SParameterPlotter::CacheReady,
+            m_fileCache.get(), &FileCache::saveDataToCache, Qt::QueuedConnection);
+
+    // Данные были занесены в кэш --> Обновление панели UI: QListView
+    connect(m_fileCache.get(), &FileCache::CacheUpdate,
+            this, &MainWindow::updateCacheListView, Qt::QueuedConnection);
 }
 
 void MainWindow::on_measureButton_clicked()
@@ -179,5 +199,13 @@ void MainWindow::handleIdnResponse(const QString &idnInfo) {
     } else {
         ui->modelLabel->setText("Неизвестно");
         ui->vendorLabel->setText("Неизвестно");
+    }
+}
+
+void MainWindow::updateCacheListView(const QQueue<QString> &cachedFiles) {
+    m_cacheModel->clear();
+    for (const QString& filePath : cachedFiles) {
+        QFileInfo fileInfo(filePath);
+        m_cacheModel->appendRow(new QStandardItem(fileInfo.fileName()));
     }
 }

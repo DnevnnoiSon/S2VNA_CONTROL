@@ -49,6 +49,11 @@ public slots:
      */
     void updateChart(const QString &response);
 
+signals:
+    /**
+     * @brief Данные готовы к кэшированию
+     */
+    void CacheReady(const QVector<QPair<QPair<double, double>, double>>& parsedData);
 private:
     /**
      * @brief Выполняет первоначальную настройку объекта QChart.

@@ -15,13 +15,12 @@ SOURCES += \
 
 HEADERS += \
    Inc/connectionSettings.h \
-   Inc/filecache.h \
    Inc/icommunication.h \
    Inc/mainwindow.h \
    Inc/s2vna_scpi.h \
    Inc/socketcommunication.h \
    Inc/sparameterplotter.h \
-   Src/filecache.h
+   Inc/filecache.h
 
 FORMS += \
     ui/mainwindow.ui

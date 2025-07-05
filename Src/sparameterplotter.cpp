@@ -80,11 +80,13 @@ void SParameterPlotter::setFrequencyData(const QVector<double>& frequencies) {
 void SParameterPlotter::updateChart(const QString &response)
 {
     const auto coordinates = m_scpiParser.parseResponse(response, m_frequencies);
+    //Вот здесь стоит делать кэширование - когда получили готовые данные
     if (coordinates.isEmpty()) {
         qWarning() << "C SCPI парсера получены пустые данные S параметров";
         m_series->clear();
         return;
     }
+    emit CacheReady(coordinates);
 
     QVector<QPointF> points;
     points.reserve(coordinates.size());

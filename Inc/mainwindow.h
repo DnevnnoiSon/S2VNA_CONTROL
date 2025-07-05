@@ -5,6 +5,8 @@
 #include <memory>
 #include "s2vna_scpi.h" // Добавлено для m_scpi
 
+#include <QStandardItemModel>
+
 namespace Ui {
 class MainWindow;
 }
@@ -14,6 +16,7 @@ class QThread;
 class SParameterPlotter;
 class ICommunication;
 class ConnectionSettings;
+class FileCache;
 
 /**
  * @brief Главное окно приложения.
@@ -77,6 +80,17 @@ private slots:
      */
     void handleIdnResponse(const QString &idnInfo);
 
+    /**
+     * @brief Обрабатывает обновление кэша
+     * @param cachedFiles Актуальные файлы находящиеся в обновленном кэше.
+     */
+    void updateCacheListView(const QQueue<QString> &cachedFiles);
+
+    /**
+     * @brief Обрабатывает запрос сохранения данных в кэш
+     * @param cachedFiles данные которые будут записаны в файл и занесены в кэш.
+     */
+   // void requestCacheSave(const QVector<QPair<QPair<double, double>, double>>& dataToCache);
 private:
     /**
      * @brief Инициализирует и настраивает компоненты UI.
@@ -95,11 +109,17 @@ private:
 
     std::unique_ptr<Ui::MainWindow> ui;  ///< Указатель на UI-компоненты, сгенерированные из .ui файла.
     SParameterPlotter* m_plotter;        ///< Указатель на виджет с графиком.
+
+
     std::unique_ptr<ICommunication> m_communicator;  ///< Указатель на модуль связи.
-    QThread* m_commThread;               ///< Поток, в котором будет работать модуль связи.
+    std::unique_ptr<FileCache> m_fileCache;          ///< Указатель на модуль кэширования [файловое управление кэшем]
+
+    QThread* m_commThread;  ///< Поток, в котором будет работать модуль связи.
+    QThread* m_cacheThread;  ///< Поток в котором будет работать модуль кэширования
+
     S2VNA_SCPI m_scpi;                   ///< Объект для генерации SCPI-команд.
 
-
+    QStandardItemModel* m_cacheModel;    ///< Указатель на QListView
 };
 
 #endif // MAINWINDOW_H

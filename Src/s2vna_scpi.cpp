@@ -3,7 +3,7 @@
 
 QVector<QPair<QPair<double, double>, double>> S2VNA_SCPI::parseResponse(const QString& response, const QVector<double>& frequency)
 {
-    QVector<QPair<QPair<double, double>, double>> coordinates; // Переименовано с 'Сoordinates'
+    QVector<QPair<QPair<double, double>, double>> coordinates;
     QStringList parts = response.split(',');
 
     for(auto &el : parts){

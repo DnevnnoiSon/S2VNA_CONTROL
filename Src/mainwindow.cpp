@@ -45,19 +45,13 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow(){
-
-// Завершение дочерних потоков:
-    m_cacheThread->quit();
-    if (!m_cacheThread->wait(3000)) {
-        m_cacheThread->terminate();
-        m_cacheThread->wait();
-    }
-
+    // Посылаю сигнал потокам на завершение их циклов событий
     m_commThread->quit();
-    if (!m_commThread->wait(3000)) {
-        m_commThread->terminate();
-        m_commThread->wait();
-    }
+    m_cacheThread->quit();
+
+    // Ожидание, пока потоки обработают все события в очереди
+    m_commThread->wait();
+    m_cacheThread->wait();
 }
 
 //================ Создание виджетов ===============//
@@ -80,8 +74,6 @@ void MainWindow::setupUiAppearance(){}
 
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::setupConnections(){
-    // Завершения потока --> удаление объекта связи
-    connect(m_commThread, &QThread::finished, m_communicator.get(), &QObject::deleteLater);
 
     // Изменение статуса хоста --> Кнопка измерить в зеленный цвет
     connect(m_communicator.get(), &ICommunication::deviceStatusChanged,
@@ -114,6 +106,7 @@ void MainWindow::setupConnections(){
     // Данные были занесены в кэш --> Обновление панели UI: QListView
     connect(m_fileCache.get(), &FileCache::CacheUpdate,
             this, &MainWindow::updateCacheListView, Qt::QueuedConnection);
+
 }
 
 void MainWindow::on_measureButton_clicked()

@@ -55,7 +55,7 @@ void FileCache::getCacheFromResources()
 }
 
 void FileCache::saveDataToCache(const QVector<QPair<QPair<double, double>, double>>& parsedData) {
-    QString filePath = createNewRecord(parsedData);
+    QString filePath = createNewFile(parsedData);
     if (!filePath.isEmpty()) {
         addFileToCache(filePath);
     } else {
@@ -63,7 +63,7 @@ void FileCache::saveDataToCache(const QVector<QPair<QPair<double, double>, doubl
     }
 }
 
-QString FileCache::createNewRecord(const QVector<QPair<QPair<double, double>, double>>& Data) {
+QString FileCache::createNewFile(const QVector<QPair<QPair<double, double>, double>>& Data) {
     // Создание имени файлу, аргументами являются: [ год месяц день _ часы минуты секунды миллисекунды ]
     QString fileName = QString("graph_data_%1.txt").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
 

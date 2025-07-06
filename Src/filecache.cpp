@@ -9,20 +9,17 @@ FileCache::FileCache( int cacheSize, QObject *parent)
     : QObject(parent),
     m_cacheSize(cacheSize)
 {
-    if (m_cacheSize <= 0 || m_cacheSize > 10) {
-        m_cacheSize = 10;
-        // qWarning() << "Кэш был установлен дефолтным [максимальным] значением - 10 записей"; // Это не предупреждение, а ожидаемое поведение
+    if (m_cacheSize <= 0 || m_cacheSize > 8) {
+        m_cacheSize = 8;
+         qDebug() << "Кэш был установлен дефолтным [максимальным] значением - 10 записей";
     }
 
-    // Определяем путь для папки кэша. Используем QStandardPaths для надежности.
-    // Например, в пользовательских данных приложения. Или просто в текущей директории.
-    // Выберем текущую директорию для простоты демонстрации, создав подпапку "cache".
-    m_cacheDirPath = QDir::currentPath() + QDir::separator() + "cache";
+    m_cacheDirPath = QDir::currentPath() + QDir::separator() + "history";
 
     QDir cacheDir(m_cacheDirPath);
     if (!cacheDir.exists()) {
-        if (!cacheDir.mkpath(".")) { // Создаем папку, если ее нет
-            qWarning() << "Не удалось создать директорию кэша:" << m_cacheDirPath;
+        if (!cacheDir.mkpath(".")) {
+            qWarning() << "Не удалось создать директорию для кэша:" << m_cacheDirPath;
         }
     }
 }
@@ -32,26 +29,26 @@ void FileCache::getCacheFromResources()
     QDir cacheDir(m_cacheDirPath);
 
     if (!cacheDir.exists()) {
-        qWarning() << "Директория кэша:" << m_cacheDirPath << "не найдена. Возможно, не была создана.";
+        qWarning() << "Директория для кэша:" << m_cacheDirPath << "не найдена.";
         return;
     }
 
-    // Получаем список файлов, отсортированных по дате изменения (от самых новых к самым старым)
+    // Список файлов, отсортированных по дате изменения (от самых новых к самым старым)
     QList<QFileInfo> fileInfoList = cacheDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot, QDir::Time);
 
-    m_cachedFiles.clear(); // Очищаем текущий кэш перед заполнением
+    m_cachedFiles.clear(); // Очищение текущего кэша
     for (int idx = 0; idx < qMin(fileInfoList.size(), m_cacheSize); ++idx) {
         m_cachedFiles.prepend(fileInfoList.at(idx).absoluteFilePath());
         qDebug() << "Загружен файл из кэша:" << fileInfoList.at(idx).absoluteFilePath();
     }
 
-    // Удаление лишних файлов, если их больше, чем размер кэша (может быть, если размер кэша уменьшили)
+    // Удаление лишних файлов, если их больше, чем размер кэша (на случай если размер кэша уменьшили чужие рученки)
     while (m_cachedFiles.size() > m_cacheSize) {
         QString oldFile = m_cachedFiles.takeLast();
         QFile::remove(oldFile);
         qDebug() << "Удален лишний файл из кэша (превышен лимит):" << oldFile;
     }
-    emit CacheUpdate(m_cachedFiles); // Оповещаем UI о начальной загрузке кэша
+    emit CacheUpdate(m_cachedFiles); // Оповещение UI о начальной загрузке кэша
 }
 
 void FileCache::saveDataToCache(const QVector<QPair<QPair<double, double>, double>>& parsedData) {
@@ -65,7 +62,7 @@ void FileCache::saveDataToCache(const QVector<QPair<QPair<double, double>, doubl
 
 QString FileCache::createNewFile(const QVector<QPair<QPair<double, double>, double>>& Data) {
     // Создание имени файлу, аргументами являются: [ год месяц день _ часы минуты секунды миллисекунды ]
-    QString fileName = QString("graph_data_%1.txt").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
+    QString fileName = QString("graphic_%1.txt").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
 
     // Опредение пути для сохранения файла: в подпапке кэша
     QString filePath = m_cacheDirPath + QDir::separator() + fileName;
@@ -92,17 +89,16 @@ QString FileCache::createNewFile(const QVector<QPair<QPair<double, double>, doub
 void FileCache::addFileToCache(const QString &filePath){
     // В случае если файл уже имеется:
     if (m_cachedFiles.contains(filePath)) {
-        m_cachedFiles.removeOne(filePath); // Удаляем старое вхождение, чтобы добавить в начало
+        m_cachedFiles.removeOne(filePath); // Удаление старого вхождения, чтобы добавить в начало
         qDebug() << "Файл уже в кэше, порядок изменен:" << filePath;
     } else {
-        // Если кэш полон, удаляем самый старый файл
+        // Если кэш полон, удаление самого старого файла
         if (m_cachedFiles.size() >= m_cacheSize) {
             QString oldFile = m_cachedFiles.takeLast();
-            QFile::remove(oldFile); // Удаляем файл с диска
+            QFile::remove(oldFile);
             qDebug() << "Кэш полон. Удаление самого старого файла из кэша:" << oldFile;
         }
     }
-    // Добавление в начало очереди:
     m_cachedFiles.prepend(filePath);
 
     emit CacheUpdate(m_cachedFiles); // Оповещение для UI, что кэш обновлен

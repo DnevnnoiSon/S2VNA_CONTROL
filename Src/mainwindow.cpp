@@ -196,9 +196,29 @@ void MainWindow::handleIdnResponse(const QString &idnInfo) {
 }
 
 void MainWindow::updateCacheListView(const QQueue<QString> &cachedFiles) {
-    m_cacheModel->clear();
-    for (const QString& filePath : cachedFiles) {
+    ui->historylistWidget->clear();
+
+    // 2. Проходим по актуальному списку файлов в кэше.
+    for (const QString &filePath : cachedFiles) {
         QFileInfo fileInfo(filePath);
-        m_cacheModel->appendRow(new QStandardItem(fileInfo.fileName()));
+        QString fileName = fileInfo.fileName();
+
+        // 3. Создаем кнопку и задаем ей имя файла в качестве текста.
+        QPushButton *button = new QPushButton(fileName, this);
+
+        button->setFixedHeight(30);
+
+        // 4. Создаем элемент списка (контейнер для нашей кнопки).
+        QListWidgetItem *item = new QListWidgetItem();
+
+        // 5. Добавляем элемент-контейнер в QListWidget.
+        ui->historylistWidget->addItem(item);
+
+        // 6. Устанавливаем нашу кнопку в качестве виджета для этого элемента.
+        // QListWidget автоматически управляет размером и положением кнопки.
+        item->setSizeHint(button->sizeHint() / 2); // Задаем элементу размер кнопки
+        ui->historylistWidget->setItemWidget(item, button);
+
     }
+
 }

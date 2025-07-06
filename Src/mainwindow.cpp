@@ -70,7 +70,8 @@ void MainWindow::InitUI()
 }
 
 //========================Установка стилей ==========================//
-void MainWindow::setupUiAppearance(){}
+void MainWindow::setupUiAppearance(){
+}
 
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::setupConnections(){

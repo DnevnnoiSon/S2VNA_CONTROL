@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <memory>
-#include "s2vna_scpi.h" // Добавлено для m_scpi
+#include "s2vna_scpi.h"
 
 #include <QStandardItemModel>
 
@@ -78,7 +78,7 @@ private slots:
      * @brief Обрабатывает и отображает идентификационную информацию устройства.
      * @param idnInfo Ответ от устройства на команду *IDN?.
      */
-    void handleIdnResponse(const QString &idnInfo);
+    void handleIdnResponse( const QString &idnInfo);
 
     /**
      * @brief Обрабатывает обновление кэша
@@ -87,10 +87,15 @@ private slots:
     void updateCacheListView(const QQueue<QString> &cachedFiles);
 
     /**
-     * @brief Обрабатывает запрос сохранения данных в кэш
-     * @param cachedFiles данные которые будут записаны в файл и занесены в кэш.
+     * @brief Обрабатывает нажатие на кнопку в кэше
+     * @param Имя файла для открытия и считывания
      */
-   // void requestCacheSave(const QVector<QPair<QPair<double, double>, double>>& dataToCache);
+    void onHistoryButtonClicked(const QString &fileName);
+
+    /**
+     * @brief Слот, обрабатывающий нажатие на кнопку "Удалить историю".
+     */
+    void on_deleteHistoryPushButton_clicked();
 private:
     /**
      * @brief Инициализирует и настраивает компоненты UI.

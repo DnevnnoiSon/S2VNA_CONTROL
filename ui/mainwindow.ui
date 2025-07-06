@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>954</width>
-    <height>863</height>
+    <height>545</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -362,6 +362,25 @@
             </property>
             <property name="spacing">
              <number>14</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="deleteHistorypushButton">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Очистить историю</string>
             </property>
            </widget>
           </item>

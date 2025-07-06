@@ -104,3 +104,20 @@ void FileCache::addFileToCache(const QString &filePath){
     emit CacheUpdate(m_cachedFiles); // Оповещение для UI, что кэш обновлен
     qDebug() << "Файл: " << filePath << " добавлен/перемещен в начало кэша";
 }
+
+
+void FileCache::clearCache()
+{
+    // Проход по всем файлам в кэше и их удаление:
+    for (const QString &filePath : m_cachedFiles) {
+        if (QFile::remove(filePath)) {
+            qDebug() << "Удален файл из кэша:" << filePath;
+        } else {
+            qWarning() << "Не удалось удалить файл из кэша:" << filePath;
+        }
+    }
+    m_cachedFiles.clear();
+
+    emit CacheUpdate(m_cachedFiles);
+    qDebug() << "Весь кэш был очищен.";
+}

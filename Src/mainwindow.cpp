@@ -75,7 +75,6 @@ void MainWindow::setupUiAppearance(){
 
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::setupConnections(){
-
     // Изменение статуса хоста --> Кнопка измерить в зеленный цвет
     connect(m_communicator.get(), &ICommunication::deviceStatusChanged,
             this, &MainWindow::onDeviceStatusChanged, Qt::QueuedConnection);
@@ -108,6 +107,9 @@ void MainWindow::setupConnections(){
     connect(m_fileCache.get(), &FileCache::CacheUpdate,
             this, &MainWindow::updateCacheListView, Qt::QueuedConnection);
 
+    // Кнопка удаления истории была нажата --> Удаление истории
+    connect(ui->deleteHistorypushButton, &QPushButton::clicked,
+            this, &MainWindow::on_deleteHistoryPushButton_clicked, Qt::QueuedConnection);
 }
 
 void MainWindow::on_measureButton_clicked()
@@ -197,29 +199,37 @@ void MainWindow::handleIdnResponse(const QString &idnInfo) {
 }
 
 void MainWindow::updateCacheListView(const QQueue<QString> &cachedFiles) {
+    // Полностью очищаем список, виджеты удаляются автоматически
     ui->historylistWidget->clear();
 
-    // 2. Проходим по актуальному списку файлов в кэше.
     for (const QString &filePath : cachedFiles) {
         QFileInfo fileInfo(filePath);
         QString fileName = fileInfo.fileName();
 
-        // 3. Создаем кнопку и задаем ей имя файла в качестве текста.
         QPushButton *button = new QPushButton(fileName, this);
-
         button->setFixedHeight(30);
+// Не большой костыль: на время пока происходит динамическое создание виджетов в цикле обновления
+        connect(button, &QPushButton::clicked, this, [this, fileName]() {
+            onHistoryButtonClicked(fileName);
+        });
 
-        // 4. Создаем элемент списка (контейнер для нашей кнопки).
         QListWidgetItem *item = new QListWidgetItem();
-
-        // 5. Добавляем элемент-контейнер в QListWidget.
         ui->historylistWidget->addItem(item);
-
-        // 6. Устанавливаем нашу кнопку в качестве виджета для этого элемента.
-        // QListWidget автоматически управляет размером и положением кнопки.
-        item->setSizeHint(button->sizeHint() / 2); // Задаем элементу размер кнопки
+        item->setSizeHint(button->sizeHint() / 2);
         ui->historylistWidget->setItemWidget(item, button);
-
     }
+}
 
+void MainWindow::onHistoryButtonClicked(const QString &fileName) {
+    qDebug() << "Кнопка была нажата для: " << fileName;
+    statusBar()->showMessage("Загрузка данных из: " + fileName, 1000);
+
+//    emit sParamsReceived(response);
+}
+
+void MainWindow::on_deleteHistoryPushButton_clicked()
+{
+    // Потокобезопасный вызов метода очистки кэша
+    QMetaObject::invokeMethod(m_fileCache.get(), &FileCache::clearCache, Qt::QueuedConnection);
+    statusBar()->showMessage("История очищена", 2000);
 }

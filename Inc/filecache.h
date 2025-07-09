@@ -37,6 +37,13 @@ public:
      */
     QString createNewFile(const QVector<QPair<QPair<double, double>, double>>& Data);
 
+    /**
+     * @brief Вспомогательная функция для чтения данных из файла истории.
+     * @param fileName Имя файла для чтения в папке history.
+     * @return Пара, содержащая вектор S-параметров и вектор частот.
+    */
+    QPair< QString , QVector<double>> readHistoryData(const QString &fileName);
+
 public slots:
     /**
      * @brief Публичный слот для сохранения данных в новый файл кэша.
@@ -64,6 +71,12 @@ public slots:
 
 signals:
     /**
+     * @brief Сигнал, передающий полученные S-параметры.
+     * @param response Строка с данными S-параметров от устройства.
+     */
+    void sParamsReceived(const QString &response);
+
+    /**
      * @brief Сигнал, который испускается при каждом обновлении содержимого кэша.
      *
      * Испускается после добавления нового файла или при первоначальной загрузке кэша,
@@ -72,6 +85,8 @@ signals:
      */
     void CacheUpdate(const QQueue<QString> &cachedFiles);
 
+
+    void errorFile(const QString& message);
 private:
     /**
      * @brief Добавляет путь к файлу в кэш, управляя лимитом размера кэша.

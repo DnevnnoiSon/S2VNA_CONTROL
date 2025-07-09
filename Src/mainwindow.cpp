@@ -99,6 +99,10 @@ void MainWindow::setupConnections(){
     connect(m_communicator.get(), &ICommunication::sParamsReceived,
             m_plotter, &SParameterPlotter::updateChart, Qt::QueuedConnection);
 
+    // Пришли сырые данные sParams --> Вывод в график
+    connect(m_fileCache.get(), &FileCache::sParamsReceived,
+            m_plotter, &SParameterPlotter::updateChart, Qt::QueuedConnection);
+
     // Данные были сформированы --> Занести в кэш перед построением
     connect(m_plotter, &SParameterPlotter::CacheReady,
             m_fileCache.get(), &FileCache::saveDataToCache, Qt::QueuedConnection);
@@ -110,6 +114,9 @@ void MainWindow::setupConnections(){
     // Кнопка удаления истории была нажата --> Удаление истории
     connect(ui->deleteHistorypushButton, &QPushButton::clicked,
             this, &MainWindow::on_deleteHistoryPushButton_clicked, Qt::QueuedConnection);
+
+    connect( m_fileCache.get(), &FileCache::errorFile,
+      this, &MainWindow::handleDeviceError, Qt::QueuedConnection);
 }
 
 void MainWindow::on_measureButton_clicked()
@@ -208,7 +215,7 @@ void MainWindow::updateCacheListView(const QQueue<QString> &cachedFiles) {
 
         QPushButton *button = new QPushButton(fileName, this);
         button->setFixedHeight(30);
-// Не большой костыль: на время пока происходит динамическое создание виджетов в цикле обновления
+// Небольшой костыль: на время пока происходит динамическое создание виджетов в цикле обновления
         connect(button, &QPushButton::clicked, this, [this, fileName]() {
             onHistoryButtonClicked(fileName);
         });
@@ -224,7 +231,18 @@ void MainWindow::onHistoryButtonClicked(const QString &fileName) {
     qDebug() << "Кнопка была нажата для: " << fileName;
     statusBar()->showMessage("Загрузка данных из: " + fileName, 1000);
 
-//    emit sParamsReceived(response);
+    // Требуется организовать чтение файла и помещение
+
+    auto [response, frequencies] = m_fileCache->readHistoryData(fileName);
+    if (response.isEmpty() || frequencies.isEmpty()) {
+        handleDeviceError("Файл истории пуст или содержит неверные данные: " + fileName);
+        return;
+    }
+
+    m_plotter->setFrequencyData(frequencies);
+
+    // Начало построения:
+    emit m_fileCache->sParamsReceived(response);
 }
 
 void MainWindow::on_deleteHistoryPushButton_clicked()

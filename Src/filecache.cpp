@@ -24,6 +24,7 @@ FileCache::FileCache( int cacheSize, QObject *parent)
     }
 }
 
+
 void FileCache::getCacheFromResources()
 {
     QDir cacheDir(m_cacheDirPath);
@@ -104,6 +105,50 @@ void FileCache::addFileToCache(const QString &filePath){
     emit CacheUpdate(m_cachedFiles); // Оповещение для UI, что кэш обновлен
     qDebug() << "Файл: " << filePath << " добавлен/перемещен в начало кэша";
 }
+
+
+QPair<QString, QVector<double>> FileCache::readHistoryData(const QString &fileName) {
+    QString sParamsString;
+    QVector<double> frequencies;
+
+    const QString filePath = QDir::currentPath() + "/history/" + fileName;
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+
+        emit errorFile("Возникли проблемы с открытием файла " + fileName);
+        return {}; // Возврат пустых данных
+    }
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        const QString line = in.readLine();
+
+        // Поиск последнего пробела в строке, чтобы отделить S-параметры от частоты
+        const int separatorPos = line.lastIndexOf(' ');
+        if (separatorPos == -1) {
+            continue; // Если пробела нет, строка некорректна
+        }
+
+        // Всё, что слева от последнего пробела — это S-параметры:
+        const QString sParamPart = line.left(separatorPos).trimmed();
+        // Всё, что справа — частота:
+        const QString freqPart = line.mid(separatorPos + 1).trimmed();
+
+        bool isFreqOk;
+        const double freq = freqPart.toDouble(&isFreqOk);
+        // Проверка сущности:
+        if (isFreqOk && sParamPart.contains(',')) {
+            if (!sParamsString.isEmpty()) {
+                sParamsString.append(',');
+            }
+            sParamsString.append(sParamPart);
+            frequencies.append(freq);
+        }
+    }
+    return {sParamsString, frequencies};
+}
+
 
 
 void FileCache::clearCache()

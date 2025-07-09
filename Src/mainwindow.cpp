@@ -116,7 +116,15 @@ void MainWindow::setupConnections(){
             this, &MainWindow::on_deleteHistoryPushButton_clicked, Qt::QueuedConnection);
 
     connect( m_fileCache.get(), &FileCache::errorFile,
-      this, &MainWindow::handleDeviceError, Qt::QueuedConnection);
+            this, &MainWindow::handleDeviceError, Qt::QueuedConnection);
+
+    // Запрос данных из MainWindow -> в FileCache
+    connect(this, &MainWindow::requestHistoryData,
+            m_fileCache.get(), &FileCache::readHistoryData, Qt::QueuedConnection);
+
+    // Ответ с данными из FileCache -> в MainWindow
+    connect(m_fileCache.get(), &FileCache::historyDataReady,
+            this, &MainWindow::onHistoryDataReady, Qt::QueuedConnection);
 }
 
 void MainWindow::on_measureButton_clicked()
@@ -228,21 +236,25 @@ void MainWindow::updateCacheListView(const QQueue<QString> &cachedFiles) {
 }
 
 void MainWindow::onHistoryButtonClicked(const QString &fileName) {
-    qDebug() << "Кнопка была нажата для: " << fileName;
+    qDebug() << "Запрос на загрузку данных для: " << fileName;
     statusBar()->showMessage("Загрузка данных из: " + fileName, 1000);
+    // Асинхронно запрашиваем данные, не блокируя GUI
+    emit requestHistoryData(fileName);
+}
 
-    // Требуется организовать чтение файла и помещение
-
-    auto [response, frequencies] = m_fileCache->readHistoryData(fileName);
+void MainWindow::onHistoryDataReady(const QString &response, const QVector<double> &frequencies) {
     if (response.isEmpty() || frequencies.isEmpty()) {
-        handleDeviceError("Файл истории пуст или содержит неверные данные: " + fileName);
+        handleDeviceError("Файл истории пуст или содержит неверные данные.");
         return;
     }
 
+    // Вся логика теперь здесь и выполняется последовательно в GUI-потоке
     m_plotter->setFrequencyData(frequencies);
+    m_plotter->setCachingEnabled(false); // Отключаем кэширование
+    m_plotter->updateChart(response);    // Напрямую вызываем отрисовку
+    m_plotter->setCachingEnabled(true);  // Включаем кэширование обратно
 
-    // Начало построения:
-    emit m_fileCache->sParamsReceived(response);
+    statusBar()->showMessage("Данные загружены", 2000);
 }
 
 void MainWindow::on_deleteHistoryPushButton_clicked()

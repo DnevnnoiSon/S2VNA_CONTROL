@@ -86,7 +86,10 @@ void SParameterPlotter::updateChart(const QString &response)
         m_series->clear();
         return;
     }
-    emit CacheReady(coordinates);
+
+    if (m_isCachingEnabled) {
+        emit CacheReady(coordinates);
+    }
 
     QVector<QPointF> points;
     points.reserve(coordinates.size());
@@ -145,4 +148,8 @@ void SParameterPlotter::updateChart(const QString &response)
     // Установка диапазонов осей
     m_axisX->setRange(finalMinX, finalMaxX);
     m_axisY->setRange(finalMinY, finalMaxY);
+}
+
+void SParameterPlotter::setCachingEnabled(bool enabled){
+    m_isCachingEnabled = enabled;
 }

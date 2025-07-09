@@ -41,6 +41,11 @@ public:
      */
     void setFrequencyData(const QVector<double>& frequencies);
 
+    /**
+     * @brief Включает или отключает кэширование следующей отрисовки.
+     * @param enabled true для включения кэширования, false для отключения.
+    */
+    void setCachingEnabled(bool enabled);
 public slots:
     /**
      * @brief Обновляет график на основе нового ответа от устройства.
@@ -82,6 +87,8 @@ private:
     // Вспомогательные данные
     S2VNA_SCPI m_scpiParser;       ///< Объект для парсинга SCPI-ответов.
     QVector<double> m_frequencies; ///< Вектор частот для текущего измерения.
+
+    bool m_isCachingEnabled = true; ///< Флаг, разрешающий кэширование
 };
 
 #endif // SPARAMETERPLOTTER_H

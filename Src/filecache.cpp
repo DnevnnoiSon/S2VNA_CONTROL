@@ -107,7 +107,7 @@ void FileCache::addFileToCache(const QString &filePath){
 }
 
 
-QPair<QString, QVector<double>> FileCache::readHistoryData(const QString &fileName) {
+void FileCache::readHistoryData(const QString &fileName) {
     QString sParamsString;
     QVector<double> frequencies;
 
@@ -115,9 +115,9 @@ QPair<QString, QVector<double>> FileCache::readHistoryData(const QString &fileNa
 
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-
         emit errorFile("Возникли проблемы с открытием файла " + fileName);
-        return {}; // Возврат пустых данных
+        emit historyDataReady("", {});
+        return; // Возврат пустых данных
     }
 
     QTextStream in(&file);
@@ -146,10 +146,9 @@ QPair<QString, QVector<double>> FileCache::readHistoryData(const QString &fileNa
             frequencies.append(freq);
         }
     }
-    return {sParamsString, frequencies};
+    file.close();
+    emit historyDataReady(sParamsString, frequencies);
 }
-
-
 
 void FileCache::clearCache()
 {

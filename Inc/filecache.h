@@ -37,19 +37,20 @@ public:
      */
     QString createNewFile(const QVector<QPair<QPair<double, double>, double>>& Data);
 
+public slots:
     /**
      * @brief Вспомогательная функция для чтения данных из файла истории.
+     * @details Становится слотом, который будет вызван из другого потока.
+     * Не возвращает значение, а испускает сигнал historyDataReady().
      * @param fileName Имя файла для чтения в папке history.
-     * @return Пара, содержащая вектор S-параметров и вектор частот.
     */
-    QPair< QString , QVector<double>> readHistoryData(const QString &fileName);
+    void readHistoryData(const QString &fileName);
 
-public slots:
     /**
      * @brief Публичный слот для сохранения данных в новый файл кэша.
      *
      * Этот слот предназначен для вызова из другого потока,
-     * для нового файла в кэше с предоставленными данными
+     * для нового файла в кэше с предоставенными данными
      * @param parsedData Данные для сохранения.
      */
     void saveDataToCache(const QVector<QPair<QPair<double, double>, double>>& parsedData);
@@ -78,15 +79,22 @@ signals:
 
     /**
      * @brief Сигнал, который испускается при каждом обновлении содержимого кэша.
-     *
-     * Испускается после добавления нового файла или при первоначальной загрузке кэша,
-     * позволяя пользовательскому интерфейсу или другим компонентам обновиться.
-     * @param cachedFiles Обновленная очередь путей к кэшированным файлам, где самый новый находится в начале.
+     * @param cachedFiles Обновленная очередь путей к кэшированным файлам.
      */
     void CacheUpdate(const QQueue<QString> &cachedFiles);
 
-
+    /**
+     * @brief Сигнал об ошибке при работе с файлом.
+     * @param message Сообщение об ошибке.
+    */
     void errorFile(const QString& message);
+
+    /**
+     * @brief Сигнал, который испускается после успешного чтения файла истории.
+     * @param sParams Строка с прочитанными S-параметрами.
+     * @param frequencies Вектор прочитанных частот.
+    */
+    void historyDataReady(const QString &sParams, const QVector<double> &frequencies);
 private:
     /**
      * @brief Добавляет путь к файлу в кэш, управляя лимитом размера кэша.

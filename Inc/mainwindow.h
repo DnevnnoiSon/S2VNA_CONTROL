@@ -48,9 +48,14 @@ signals:
     /**
      * @brief Сигнал для передачи новых настроек подключения в модуль связи.
      * @param setting Структура с новыми настройками.
-     */
+    */
     void settingConfigTransferred(const ConnectionSettings &setting);
 
+    /**
+     * @brief Сигнал для асинхронного запроса данных из файла истории.
+     * @param fileName Имя файла для чтения.
+    */
+    void requestHistoryData(const QString &fileName);
 private slots:
     /**
      * @brief Слот, обрабатывающий нажатие на кнопку "Измерить".
@@ -96,6 +101,13 @@ private slots:
      * @brief Слот, обрабатывающий нажатие на кнопку "Удалить историю".
      */
     void on_deleteHistoryPushButton_clicked();
+
+    /**
+     * @brief Слот для получения данных из кэша и отрисовки графика.
+     * @param response Строка с S-параметрами.
+     * @param frequencies Вектор частот.
+    */
+    void onHistoryDataReady(const QString &response, const QVector<double> &frequencies);
 private:
     /**
      * @brief Инициализирует и настраивает компоненты UI.

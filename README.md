@@ -32,7 +32,7 @@
 ![image](https://github.com/user-attachments/assets/48eecfae-d026-4c95-891f-3f06db5a6d3e)
 
 
-# ⚔️ Модульная структура проекта:
+# ⚔️ Модульная структура проекта [устаревшее]:
 
 ![photo_2025-05-28_10-49-41](https://github.com/user-attachments/assets/0f0fd4e0-9079-4c37-b9bf-212518eab611)
 

@@ -649,7 +649,7 @@ border-radius: 8px;</string>
                 <bool>false</bool>
                </property>
                <property name="styleSheet">
-                <string notr="true">background: transparent; border: none;</string>
+                <string notr="true"> border: none;</string>
                </property>
                <property name="text">
                 <string/>

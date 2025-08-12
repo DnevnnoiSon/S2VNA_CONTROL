@@ -1,36 +1,57 @@
-QT       += core gui widgets network charts
-
+QT += core gui widgets charts network
+TARGET = Vector_Circuit_Analizator_Control
+TEMPLATE = app
 CONFIG += c++17
 
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-INCLUDEPATH += Inc
+DESTDIR = build
+MOC_DIR = $$DESTDIR/moc
+OBJECTS_DIR = $$DESTDIR/obj
+UI_DIR = $$DESTDIR/ui
+RCC_DIR = $$DESTDIR/rcc
+
 
 SOURCES += \
-   Src/filecache.cpp \
-   Src/main.cpp \
-   Src/mainwindow.cpp \
-   Src/s2vna_scpi.cpp \
-   Src/socketcommunication.cpp \
-   Src/sparameterplotter.cpp
+    src/app/main.cpp \
+    src/core/caching/filecache.cpp \
+    src/core/communication/socketcommunication.cpp \
+    src/core/scpi/s2vnascpi.cpp \
+    src/ui/mainwindow/mainwindow.cpp \
+    src/ui/widgets/sparameterplotter.cpp
+
 
 HEADERS += \
-   Inc/connectionSettings.h \
-   Inc/icommunication.h \
-   Inc/mainwindow.h \
-   Inc/s2vna_scpi.h \
-   Inc/socketcommunication.h \
-   Inc/sparameterplotter.h \
-   Inc/filecache.h
+    src/core/caching/filecache.h \
+    src/core/communication/icommunication.h \
+    src/core/communication/socketcommunication.h \
+    src/core/scpi/s2vnascpi.h \
+    src/core/settings/connectionSettings.h \
+    src/ui/mainwindow/mainwindow.h \
+    src/ui/widgets/sparameterplotter.h
 
 FORMS += \
-    ui/mainwindow.ui
-
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+    src/ui/mainwindow/mainwindow.ui
 
 RESOURCES += \
-    icons.qrc
+    resources/icons.qrc
 
+INCLUDEPATH += $$PWD/src \
+               $$PWD/src/core \
+               $$PWD/src/core/caching \
+               $$PWD/src/core/communication \
+               $$PWD/src/core/scpi \
+               $$PWD/src/core/settings \
+               $$PWD/src/ui \
+               $$PWD/src/ui/mainwindow \
+               $$PWD/src/ui/widgets
+
+unix {
+    LIBS += -L/usr/lib/x86_64-linux-gnu
+    QMAKE_CXXFLAGS += -fPIC
+}
+
+win32 {
+    CONFIG += console
+}
+
+CONFIG -= precompile_header
+AUTOMOC = YES

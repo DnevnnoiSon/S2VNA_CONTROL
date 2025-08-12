@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <memory>
-#include "s2vna_scpi.h"
+#include "s2vnascpi.h"
 
 #include <QStandardItemModel>
 

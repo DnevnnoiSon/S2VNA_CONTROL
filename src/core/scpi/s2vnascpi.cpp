@@ -1,4 +1,4 @@
-#include "s2vna_scpi.h"
+#include "s2vnascpi.h"
 #include <QDebug>
 
 QVector<QPair<QPair<double, double>, double>> S2VNA_SCPI::parseResponse(const QString& response, const QVector<double>& frequency)

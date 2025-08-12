@@ -7,7 +7,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 
-#include "s2vna_scpi.h"
+#include "s2vnascpi.h"
 
 QT_BEGIN_NAMESPACE
     class QChartView;

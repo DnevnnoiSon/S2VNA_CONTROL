@@ -5,7 +5,7 @@
 #include "filecache.h"
 #include "connectionSettings.h"
 #include "sparameterplotter.h"
-#include "s2vna_scpi.h"
+#include "s2vnascpi.h"
 
 #include <QThread>
 #include <QVector>

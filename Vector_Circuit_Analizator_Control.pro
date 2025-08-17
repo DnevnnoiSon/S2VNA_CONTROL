@@ -26,7 +26,8 @@ HEADERS += \
     src/core/scpi/s2vnascpi.h \
     src/core/settings/connectionSettings.h \
     src/ui/mainwindow/mainwindow.h \
-    src/ui/plotter/sparameterplotter.h
+    src/ui/plotter/sparameterplotter.h \
+    src/ui/tools/itoolplugin.h
 
 FORMS += \
     src/ui/mainwindow/mainwindow.ui
@@ -42,7 +43,8 @@ INCLUDEPATH += $$PWD/src \
                $$PWD/src/core/settings \
                $$PWD/src/ui \
                $$PWD/src/ui/mainwindow \
-               $$PWD/src/ui/plotter
+               $$PWD/src/ui/plotter \
+               $$PWD/src/ui/tools
 
 unix {
     LIBS += -L/usr/lib/x86_64-linux-gnu

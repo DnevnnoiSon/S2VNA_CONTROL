@@ -130,8 +130,6 @@ private:
     ICommunication* m_communicator;  ///< Указатель на модуль связи.
     FileCache* m_fileCache;          ///< Указатель на модуль кэширования [файловое управление кэшем]
 
-
-
     QThread* m_commThread;  ///< Поток, в котором будет работать модуль связи.
     QThread* m_cacheThread;  ///< Поток в котором будет работать модуль кэширования
 

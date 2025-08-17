@@ -16,7 +16,7 @@ SOURCES += \
     src/core/communication/socketcommunication.cpp \
     src/core/scpi/s2vnascpi.cpp \
     src/ui/mainwindow/mainwindow.cpp \
-    src/ui/widgets/sparameterplotter.cpp
+    src/ui/plotter/sparameterplotter.cpp
 
 
 HEADERS += \
@@ -26,7 +26,7 @@ HEADERS += \
     src/core/scpi/s2vnascpi.h \
     src/core/settings/connectionSettings.h \
     src/ui/mainwindow/mainwindow.h \
-    src/ui/widgets/sparameterplotter.h
+    src/ui/plotter/sparameterplotter.h
 
 FORMS += \
     src/ui/mainwindow/mainwindow.ui
@@ -42,11 +42,11 @@ INCLUDEPATH += $$PWD/src \
                $$PWD/src/core/settings \
                $$PWD/src/ui \
                $$PWD/src/ui/mainwindow \
-               $$PWD/src/ui/widgets
+               $$PWD/src/ui/plotter
 
 unix {
     LIBS += -L/usr/lib/x86_64-linux-gnu
-    QMAKE_CXXFLAGS += -fPIC
+    # QMAKE_CXXFLAGS += -fPIC
 }
 
 win32 {

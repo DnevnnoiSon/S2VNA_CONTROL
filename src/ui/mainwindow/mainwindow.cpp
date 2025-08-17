@@ -32,13 +32,13 @@ MainWindow::MainWindow(QWidget *parent) :
     // Запуск дочернего потока - поток кэширования [файловое управление кэшем]
     m_cacheThread->start();
     // Вызов внутри дочернего потока
-    QMetaObject::invokeMethod(m_fileCache.get(),
+    QMetaObject::invokeMethod(m_fileCache,
     &FileCache::getCacheFromResources, Qt::QueuedConnection);
 
     // Запуск дочернего потока - поток связи
     m_commThread->start();
     // Вызов внутри дочернего потока
-    QMetaObject::invokeMethod(static_cast<SocketCommunication*>(m_communicator.get()),
+    QMetaObject::invokeMethod(static_cast<SocketCommunication*>(m_communicator),
     &SocketCommunication::initialize);
 
 /// [ Под указателем на интерфейс ICommunication -> объект класса SocketCommunication ]
@@ -57,10 +57,10 @@ MainWindow::~MainWindow(){
 //================ Создание виджетов ===============//
 void MainWindow::InitUI()
 {
-    m_communicator = std::make_unique<SocketCommunication>();
+    m_communicator = new SocketCommunication();
     m_communicator->moveToThread(m_commThread);
 
-    m_fileCache = std::make_unique<FileCache>();
+    m_fileCache = new FileCache();
     m_fileCache->moveToThread(m_cacheThread);
 
     m_plotter = new SParameterPlotter(this);
@@ -76,54 +76,54 @@ void MainWindow::setupUiAppearance(){
 //================== Настройка сигналов и слотов=====================//
 void MainWindow::setupConnections(){
     // Изменение статуса хоста --> Кнопка измерить в зеленный цвет
-    connect(m_communicator.get(), &ICommunication::deviceStatusChanged,
+    connect(m_communicator, &ICommunication::deviceStatusChanged,
             this, &MainWindow::onDeviceStatusChanged, Qt::QueuedConnection);
 
     // Сигнал сокетной ошибки --> Обработка ошибки
-    connect(m_communicator.get(), &ICommunication::errorOccurred,
+    connect(m_communicator, &ICommunication::errorOccurred,
             this, &MainWindow::handleDeviceError, Qt::QueuedConnection);
 
     // Передача валидных данных --> в поток связи
     connect(this, &MainWindow::measureConfigTransferred,
-            m_communicator.get(), &ICommunication::acceptMeasureConfig, Qt::QueuedConnection);
+            m_communicator, &ICommunication::acceptMeasureConfig, Qt::QueuedConnection);
 
     // Передача сетевых настроек --> в поток связи
     connect(this, &MainWindow::settingConfigTransferred,
-            m_communicator.get(), &ICommunication::acceptSettingConfig, Qt::QueuedConnection);
+            m_communicator, &ICommunication::acceptSettingConfig, Qt::QueuedConnection);
 
     // Ответ от IDN? --> Обработка/Вывод на экран
-    connect(m_communicator.get(), &ICommunication::idnReceived,
+    connect(m_communicator, &ICommunication::idnReceived,
             this, &MainWindow::handleIdnResponse, Qt::QueuedConnection);
 
     // Пришли сырые данные sParams --> Вывод в график
-    connect(m_communicator.get(), &ICommunication::sParamsReceived,
+    connect(m_communicator, &ICommunication::sParamsReceived,
             m_plotter, &SParameterPlotter::updateChart, Qt::QueuedConnection);
 
     // Пришли сырые данные sParams --> Вывод в график
-    connect(m_fileCache.get(), &FileCache::sParamsReceived,
+    connect(m_fileCache, &FileCache::sParamsReceived,
             m_plotter, &SParameterPlotter::updateChart, Qt::QueuedConnection);
 
     // Данные были сформированы --> Занести в кэш перед построением
     connect(m_plotter, &SParameterPlotter::CacheReady,
-            m_fileCache.get(), &FileCache::saveDataToCache, Qt::QueuedConnection);
+            m_fileCache, &FileCache::saveDataToCache, Qt::QueuedConnection);
 
     // Данные были занесены в кэш --> Обновление панели UI: QListView
-    connect(m_fileCache.get(), &FileCache::CacheUpdate,
+    connect(m_fileCache, &FileCache::CacheUpdate,
             this, &MainWindow::updateCacheListView, Qt::QueuedConnection);
 
     // Кнопка удаления истории была нажата --> Удаление истории
     connect(ui->deleteHistorypushButton, &QPushButton::clicked,
             this, &MainWindow::on_deleteHistoryPushButton_clicked, Qt::QueuedConnection);
 
-    connect( m_fileCache.get(), &FileCache::errorFile,
+    connect( m_fileCache, &FileCache::errorFile,
             this, &MainWindow::handleDeviceError, Qt::QueuedConnection);
 
     // Запрос данных из MainWindow -> в FileCache
     connect(this, &MainWindow::requestHistoryData,
-            m_fileCache.get(), &FileCache::readHistoryData, Qt::QueuedConnection);
+            m_fileCache, &FileCache::readHistoryData, Qt::QueuedConnection);
 
     // Ответ с данными из FileCache -> в MainWindow
-    connect(m_fileCache.get(), &FileCache::historyDataReady,
+    connect(m_fileCache, &FileCache::historyDataReady,
             this, &MainWindow::onHistoryDataReady, Qt::QueuedConnection);
 }
 
@@ -260,6 +260,6 @@ void MainWindow::onHistoryDataReady(const QString &response, const QVector<doubl
 void MainWindow::on_deleteHistoryPushButton_clicked()
 {
     // Потокобезопасный вызов метода очистки кэша
-    QMetaObject::invokeMethod(m_fileCache.get(), &FileCache::clearCache, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_fileCache, &FileCache::clearCache, Qt::QueuedConnection);
     statusBar()->showMessage("История очищена", 2000);
 }

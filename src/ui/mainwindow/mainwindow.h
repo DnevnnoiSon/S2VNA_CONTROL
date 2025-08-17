@@ -127,8 +127,10 @@ private:
     std::unique_ptr<Ui::MainWindow> ui;  ///< Указатель на UI-компоненты, сгенерированные из .ui файла.
     SParameterPlotter* m_plotter;        ///< Указатель на виджет с графиком.
 
-    std::unique_ptr<ICommunication> m_communicator;  ///< Указатель на модуль связи.
-    std::unique_ptr<FileCache> m_fileCache;         ///< Указатель на модуль кэширования [файловое управление кэшем]
+    ICommunication* m_communicator;  ///< Указатель на модуль связи.
+    FileCache* m_fileCache;          ///< Указатель на модуль кэширования [файловое управление кэшем]
+
+
 
     QThread* m_commThread;  ///< Поток, в котором будет работать модуль связи.
     QThread* m_cacheThread;  ///< Поток в котором будет работать модуль кэширования

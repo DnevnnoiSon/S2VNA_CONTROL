@@ -364,7 +364,7 @@
           <item>
            <widget class="QListWidget" name="historylistWidget">
             <property name="styleSheet">
-             <string notr="true">background-color: #dark; /* Фон темнее */</string>
+             <string notr="true">background-color: #2d2d2d;</string>
             </property>
             <property name="spacing">
              <number>14</number>
@@ -372,7 +372,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="deleteHistorypushButton">
+           <widget class="QPushButton" name="deleteHistoryPushButton">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -384,6 +384,9 @@
               <width>16777215</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
             </property>
             <property name="text">
              <string>Очистить историю</string>

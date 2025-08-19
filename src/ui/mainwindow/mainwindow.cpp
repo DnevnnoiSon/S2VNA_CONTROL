@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     setupUiAppearance(); // Стилизация
     setupConnections();  // Сигналы/слоты
 
+    loadPlugins();
+
     // Запуск дочернего потока - поток кэширования [файловое управление кэшем]
     m_cacheThread->start();
     // Вызов внутри дочернего потока
@@ -112,7 +114,7 @@ void MainWindow::setupConnections(){
             this, &MainWindow::updateCacheListView, Qt::QueuedConnection);
 
     // Кнопка удаления истории была нажата --> Удаление истории
-    connect(ui->deleteHistorypushButton, &QPushButton::clicked,
+    connect(ui->deleteHistoryPushButton, &QPushButton::clicked,
             this, &MainWindow::on_deleteHistoryPushButton_clicked, Qt::QueuedConnection);
 
     connect( m_fileCache, &FileCache::errorFile,
@@ -263,3 +265,23 @@ void MainWindow::on_deleteHistoryPushButton_clicked()
     QMetaObject::invokeMethod(m_fileCache, &FileCache::clearCache, Qt::QueuedConnection);
     statusBar()->showMessage("История очищена", 2000);
 }
+
+void MainWindow:: loadPlugins()
+{
+    QDir pluginsDir(qApp->applicationDirPath());
+
+    if (!pluginsDir.cd("tool")) {
+        qWarning() << "Каталог 'plugins' не найден.";
+        return;
+    }
+
+    qInfo() << "Сканирование плагинов в:" << pluginsDir.absolutePath();
+}
+
+
+
+
+
+
+
+

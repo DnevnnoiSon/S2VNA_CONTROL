@@ -7,6 +7,8 @@
 
 class SParameterPlotter;
 
+constexpr auto IToolPlugin_iid = "s2vnacontrol.IToolPlugin";
+
 class IToolPlugin
 {
 public:
@@ -25,5 +27,7 @@ public:
     // Метод, вызываемый при деактивации (выборе другого инструмента)
     virtual void deactivate() = 0;
 };
+
+Q_DECLARE_INTERFACE(IToolPlugin, IToolPlugin_iid);
 
 #endif // ITOOLPLUGIN_H

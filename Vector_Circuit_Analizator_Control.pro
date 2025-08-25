@@ -1,4 +1,5 @@
 QT += core gui widgets charts network
+
 TARGET = Vector_Circuit_Analizator_Control
 TEMPLATE = app
 CONFIG += c++17
@@ -16,7 +17,8 @@ SOURCES += \
     src/core/communication/socketcommunication.cpp \
     src/core/scpi/s2vnascpi.cpp \
     src/ui/mainwindow/mainwindow.cpp \
-    src/ui/plotter/sparameterplotter.cpp
+    src/ui/plotter/sparameterplotter.cpp \
+    src/ui/toolpanel/toolpanel.cpp
 
 
 HEADERS += \
@@ -27,10 +29,12 @@ HEADERS += \
     src/core/settings/connectionSettings.h \
     src/ui/mainwindow/mainwindow.h \
     src/ui/plotter/sparameterplotter.h \
-    src/ui/tools/itoolplugin.h
+    src/ui/tools/itoolplugin.h \
+    src/ui/toolpanel/toolpanel.h
 
 FORMS += \
-    src/ui/mainwindow/mainwindow.ui
+    src/ui/mainwindow/mainwindow.ui \
+    src/ui/toolpanel/toolpanel.ui
 
 RESOURCES += \
     resources/icons.qrc

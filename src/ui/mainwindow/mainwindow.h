@@ -124,6 +124,11 @@ private:
      */
     void setupUiAppearance();
 
+    /**
+     * @brief Загрузка плагинов инструментов для графика
+    */
+    void loadPlugins();
+
     std::unique_ptr<Ui::MainWindow> ui;  ///< Указатель на UI-компоненты, сгенерированные из .ui файла.
     SParameterPlotter* m_plotter;        ///< Указатель на виджет с графиком.
 

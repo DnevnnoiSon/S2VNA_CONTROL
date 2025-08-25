@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     // Регистрация кастомного типа данных:
     qRegisterMetaType<ConnectionSettings>("ConnectionSettings");
 
+
     MainWindow w;
     w.show();
 

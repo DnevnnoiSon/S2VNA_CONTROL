@@ -34,7 +34,7 @@ QVector<QPair<QPair<double, double>, double>> S2VNA_SCPI::parseResponse(const QS
 }
 
 QString S2VNA_SCPI::generateCommand(const QList<QPair<QString, QVariant>>& params) const
-{ // Команда - ключ, Значение - строка
+{
     QStringList commands;
 
     for (const auto &[key, value] : params) {

@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "ui/toolpanel/toolpanel.h"
+#include "ui/tools/itoolplugin.h"
+
 #include "socketcommunication.h"
 #include "filecache.h"
 #include "connectionSettings.h"
@@ -10,6 +13,11 @@
 #include <QThread>
 #include <QVector>
 #include <numeric>
+
+#include <QDir>
+#include <QPluginLoader>
+
+Q_DECLARE_METATYPE(SParameterPlotter*)
 
 static constexpr int MAX_POWER = 60;
 static constexpr double MEGAHERTZ_MULTIPLIER = 1e6;
@@ -69,6 +77,8 @@ void MainWindow::InitUI()
     ui->frame_6->setLayout(new QVBoxLayout());
     ui->frame_6->layout()->addWidget(m_plotter);
     ui->frame_6->layout()->setContentsMargins(0, 0, 0, 0);
+
+    ui->toolPanel->setPlotter(m_plotter);
 }
 
 //========================Установка стилей ==========================//
@@ -271,11 +281,34 @@ void MainWindow:: loadPlugins()
     QDir pluginsDir(qApp->applicationDirPath());
 
     if (!pluginsDir.cd("tool")) {
-        qWarning() << "Каталог 'plugins' не найден.";
+        qWarning() << "Директория для плагинов не найдена по заданному пути";
         return;
     }
 
-    qInfo() << "Сканирование плагинов в:" << pluginsDir.absolutePath();
+    qInfo() << "Сканирование плагинов в: " << pluginsDir.absolutePath();
+
+    for (const QString &fileName : pluginsDir.entryList(QDir::Files))
+    {
+        QString pluginPath = pluginsDir.absoluteFilePath(fileName);
+        QPluginLoader loader(pluginPath);
+
+        QObject *pluginObject = loader.instance();
+
+        if (pluginObject) {
+            IToolPlugin *tool = qobject_cast<IToolPlugin*>(pluginObject);
+
+            if (tool) {
+                qInfo() << "Плагин успешно загружен:" << tool->name();
+                // Добавление валидного инструмента на панель
+                ui->toolPanel->addTool(tool);
+            } else {
+                qWarning() << "Не удалось преобразовать плагин к интерфейсу IToolPlugin:" << fileName;
+                loader.unload();
+            }
+        } else {
+            qWarning() << "Ошибка загрузки плагина:" << fileName << "Текст ошибки:" << loader.errorString();
+        }
+    }
 }
 
 
